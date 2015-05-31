@@ -1,6 +1,6 @@
 ### CHANGE THESE LINES TO MATCH YOUR SYSTEM        ###
 ### COMPILER PATH                                  ###
-CC = /usr/bin/clang++
+CC = /usr/bin/g++
 ### CUDA FOLDER PATH                               ###
 CUDA_PATH       ?= /usr/local/cuda-6.5
 # CUDA code generation flags
