@@ -79,10 +79,26 @@ void delete_data() {
 }
 
 __device__
-float2 get_force(int i) {
+float2 get_force(int pos) {
   // sum force from every other particle
   // based on mass, position of both particles
-    
+  float2 force;
+  force.x = 0;
+  force.y = 0;
+
+  for (int i = 0; i < num_particles; i++)
+  {
+    float dist_squared = pow((particle_data[pingpong][pos].x - particle_data[pingpong][i].x), 2) 
+                         + pow((particle_data[pingpong][pos].y - particle_data[pingpong][i].y), 2);  
+
+    if (dist_squared > 0)
+    {
+      float force_magnitude = particle_data[pingpong][pos].z * particle_data[pingppong][i].z / dist_squared;
+      force.x += (particle_data[pingpong][i].x - particle_data[pingpong][pos].x) * force_magnitude / sqrt(dist_squared);
+      force.y += (particle_data[pingpong][i].y - particle_data[pingpong][pos].y) * force_magnitude / sqrt(dist_squared);
+    }
+  }
+  return force;  
 }
 
 __global__
