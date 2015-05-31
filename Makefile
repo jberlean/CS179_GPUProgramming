@@ -46,7 +46,7 @@ all: $(TARGETS)
 n_body_sim: n_body_sim.cc n_body_sim.o
 	$(CC) $< -o $@ n_body_sim.o -O3 -I$(CUDA_INC_PATH) $(LDFLAGS) $(LD_FLAGS) -Wall
 
-n_body_sim.o: n_body_sim.cu
+n_body_sim.o: n_body_sim_cuda.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -I$(CC_INCLUDE) -o $@ -c $<
 
 
