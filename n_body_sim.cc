@@ -1,5 +1,3 @@
-
-// includes, system
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

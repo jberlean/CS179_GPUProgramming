@@ -17,7 +17,9 @@ inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)
 // Flag for pingpong;
 int pingpong = 0;
 
-int num_particles;     // Number particles; determined at runtime.
+// Number particles; determined at runtime.
+int num_particles;    
+ 
 int num_blocks;
 int num_threads_per_block;
 
@@ -93,8 +95,7 @@ void delete_data() {
 
 __device__
 float2 get_force(int pos, float3 * data_old, int num_particles) {
-  // sum force from every other particle
-  // based on mass, position of both particles
+  // sum force from every other particle based on mass, position of both particles
   float2 force;
   force.x = 0;
   force.y = 0;
@@ -106,7 +107,8 @@ float2 get_force(int pos, float3 * data_old, int num_particles) {
 
     if (dist_squared > 0)
     {
-      float force_magnitude = data_old[pos].z * data_old[i].z / (dist_squared + 1);
+      float SOFT_FACTOR = 1.0; 
+      float force_magnitude = data_old[pos].z * data_old[i].z / (dist_squared + SOFT_FACTOR);
       force.x += (data_old[i].x - data_old[pos].x) * force_magnitude / sqrt(dist_squared);
       force.y += (data_old[i].y - data_old[pos].y) * force_magnitude / sqrt(dist_squared);
     }
@@ -128,7 +130,6 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
     data_new[i].y = data_old[i].y + vels_new[i].y * dt;
-
 
     i += blockDim.x * gridDim.x;
   }
