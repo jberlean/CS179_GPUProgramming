@@ -9,15 +9,21 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data(char *output_file, float *particle_data, float *particle_vels, int frame_num, int num_particles, float width, float height) {
-  std::ofstream out(output_file);
+void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame) {
+  out << num_particles << " "
+      << width << " "
+      << height << " "
+      << total_time << " "
+      << num_time_steps << " "
+      << time_steps_per_frame << std::endl;
 
-  out << frame_num << "," << num_particles << "," << width << "," << height << std::endl;
+}
+
+void output_data(std::ofstream &out, float *particle_data, float *particle_vels, int frame_num, int num_particles, float width, float height) {
+  out << frame_num << std::endl;
   for (int i = 0; i < num_particles; i++) {
-    out << particle_data[i*3] << "," << particle_data[i*3 + 1] << "," << particle_data[i*3 + 2] << std::endl;
+    out << particle_data[i*3] << " " << particle_data[i*3 + 1] << " " << particle_data[i*3 + 2] << std::endl;
   }
-
-  out.close();
 }
 
 void run_simulation(
@@ -30,8 +36,14 @@ void run_simulation(
     int num_time_steps,
     int time_steps_per_frame) {
   float dt;
+  std::ofstream out;
 
   float *particle_data, *particle_vels;
+
+  // Setup output stuff (filename and output stream)
+  char output_file[200];
+  sprintf(output_file, "./output/data_%d.dat", time(NULL));
+  out.open(output_file);
 
   // Set system parameters
   dt = total_time / num_time_steps;
@@ -44,6 +56,9 @@ void run_simulation(
   float v_max = std::min(width, height) / 100.0;
   init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block);
 
+  // Output header for data file
+  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
+
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
@@ -54,14 +69,14 @@ void run_simulation(
       // Get particle data
       get_particle_data(particle_data, particle_vels);
 
-      // Make filename
-      char output_file[200];
-      sprintf(output_file, "./output/data_%d.dat", step);
-
       // Output data
-      output_data(output_file, particle_data, particle_vels, step/time_steps_per_frame, num_particles, width, height);
+      output_data(out, particle_data, particle_vels, step/time_steps_per_frame, num_particles, width, height);
     }
   }
+
+  // Close output stream (all output finished)
+  out.close();
+  std::cout << "Output data to " << output_file << std::endl;
 
   // Free GPU data
   delete_data();
