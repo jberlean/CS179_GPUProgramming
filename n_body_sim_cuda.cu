@@ -138,7 +138,7 @@ void call_interact_kernel(float dt) {
   int h_flag;
   cudaMemcpy(&h_flag, flag, sizeof(int), cudaMemcpyDeviceToHost);
  
-  std::cout<< "FLAG " << h_flag << std::endl;
+  printf("FLAG %d\n", h_flag);
 
   // update pingpong
   pingpong = 1 - pingpong;
