@@ -58,11 +58,11 @@ void run_simulation(
       get_particle_data(particle_data, particle_vels);
 
       // Make filename
-      std::string output_file;
+      char output_file[200];
       sprintf(output_file, "./output/data_%d.dat", step);
 
       // Output data
-      output_data(output_file.c_str(), particle_data, particle_vels, num_particles, width, height);
+      output_data(output_file, particle_data, particle_vels, num_particles, width, height);
     }
   }
 
@@ -90,25 +90,33 @@ int main(int argc, char** argv)
   int time_steps_per_frame;
 
   // Set command-line arguments
-  if(argc < 9) {
-      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> <width> <height> <total-time> <num-time-steps> <time-steps-per-frame>\n");
+  if(argc == 4) {
+    width = 512;
+    height = 512;
+    total_time = 10;
+    num_time_steps = 1000;
+    time_steps_per_frame = 10;
+  } else if (argc == 9) {
+    width = atof(argv[4]);
+    height = atof(argv[5]);
+    total_time = atof(argv[6]);
+    num_time_steps = atoi(argv[7]);
+    time_steps_per_frame = atoi(argv[8]);
+  } else {
+      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n");
       exit(1);
   }
   num_blocks = atoi(argv[1]);
   num_threads_per_block = atoi(argv[2]);
   num_particles = atoi(argv[3]);
-  width = atof(argv[4]);
-  height = atof(argv[5]);
-  total_time = atof(argv[6]);
-  num_time_steps = atoi(argv[7]);
-  time_steps_per_frame = atoi(argv[8]);
 
-  // make sure output directory exists
+  // Make sure output directory exists
   std::ifstream test("output");
   if ((bool)test == false) {
     printf("Cannot find output directory, please make it (\"mkdir output\")\n");
     exit(1);
   }
 
+  // Run simulation with given parameters
   run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
 }
