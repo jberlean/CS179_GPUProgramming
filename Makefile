@@ -1,12 +1,10 @@
 ### CHANGE THESE LINES TO MATCH YOUR SYSTEM        ###
 ### COMPILER PATH                                  ###
-CC = /usr/bin/clang++
+CC = /usr/bin/g++
 ### CUDA FOLDER PATH                               ###
 CUDA_PATH       ?= /usr/local/cuda-6.5
 # CUDA code generation flags
 GENCODE_FLAGS   := -gencode arch=compute_30,code=sm_30
-# library flags -- on linux, this may look like -lgl -lglut
-LD_FLAGS = -framework OpenGL -framework GLUT
 ######################################################
 
 CUDA_INC_PATH   ?= $(CUDA_PATH)/include
