@@ -32,13 +32,22 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   while (i < num_particles)
   {
-    vels_buffer[i].x = min_vel + random[4 * i] * (max_vel - min_vel);
-    vels_buffer[i].y = min_vel + random[4 * i + 1] * (max_vel - min_vel);
+    //vels_buffer[i].x = min_vel + random[4 * i] * (max_vel - min_vel);
+    //vels_buffer[i].y = min_vel + random[4 * i + 1] * (max_vel - min_vel);
+    vels_buffer[i].x = 0;
+    vels_buffer[i].y = 0;
     data_buffer1[i].x = random[4 * i + 2] * box_width;
     data_buffer1[i].y = random[4 * i + 3] * box_height;
     data_buffer1[i].z = 1;
 
     data_buffer2[i].z = 1;    
+
+    if (i == 0) {
+      data_buffer1[i].z = 1000;
+      data_buffer2[i].z = 1000;
+      data_buffer1[i].x = box_width / 2;
+      data_buffer1[i].y = box_height / 2;
+    }
 
     i += blockDim.x * gridDim.x;
   }
@@ -106,7 +115,7 @@ float2 get_force(int pos, float3 * data_old, int num_particles) {
 }
 
 __global__
-void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles, int * flag) {
+void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
   // each thread handles a particle
   int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -114,31 +123,22 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
   {
     float2 force = get_force(i, data_old, num_particles);
     
-    vels_new[i].x += force.x * dt / data_old[i].z;
-    vels_new[i].y += force.y * dt / data_old[i].z;
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z;
+    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
     
-    data_new[i].x += vels_new[i].x * dt; 
-    data_new[i].y += vels_new[i].y * dt;
+    data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
+    data_new[i].y = data_old[i].y + vels_new[i].y * dt;
 
-    if (data_old[i].z == 1) *flag = 1;
 
     i += blockDim.x * gridDim.x;
   }
 }
 
 void call_interact_kernel(float dt) {
-  int * flag;
-  cudaMalloc(&flag, sizeof(int));
-  cudaMemset(flag, 0, sizeof(int));
-
   // call kernel
   interact_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                          particle_data[pingpong], particle_data[1 - pingpong], 
-                                                         dt, num_particles, flag);
-  int h_flag;
-  cudaMemcpy(&h_flag, flag, sizeof(int), cudaMemcpyDeviceToHost);
- 
-  printf("FLAG %d\n", h_flag);
+                                                         dt, num_particles);
 
   // update pingpong
   pingpong = 1 - pingpong;

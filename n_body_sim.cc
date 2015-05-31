@@ -44,7 +44,7 @@ void run_simulation(
 
   // Initialze data structures
   float v_max = std::min(width, height) / 100.0;
-  init_data(num_blocks, num_threads_per_block, num_particles, width, height, -v_max, v_max);
+  init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block);
 
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
