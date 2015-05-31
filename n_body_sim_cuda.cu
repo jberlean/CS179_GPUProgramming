@@ -117,8 +117,8 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
     vels_new[i].x += force.x * dt / data_old[i].z;
     vels_new[i].y += force.y * dt / data_old[i].z;
     
-    vels_new[i].x += vels_new[i].x * dt; 
-    vels_new[i].y += vels_new[i].y * dt;
+    data_new[i].x += vels_new[i].x * dt; 
+    data_new[i].y += vels_new[i].y * dt;
 
     i += blockDim.x * gridDim.x;
   }
