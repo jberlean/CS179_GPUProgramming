@@ -28,7 +28,8 @@ int pingpong = 0;
 unsigned int numBodies;     // Number particles; determined at runtime.
 
 // Device buffer variables
-float4* dVels[2];
+float2* particle_vels[2]; // x and y represent velocity in 2D
+float3* particle_data[2]; // x and y represent position in 2D, z represents mass
 
 __device__ float4 get_force(float4 pos, float4* neighbors)
 {
@@ -156,19 +157,18 @@ void createDeviceData()
 ////////////////////////////////////////////////////////////////////////////////
 void createVBOs(GLuint* vbo)
 {
-    glewInit();
+/*    glewInit();
 
     // create buffer object
     glGenBuffers(2, vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-
+*/
     // initialize buffer object; this will be used as 'oldPos' initially
-    unsigned int size = numBodies * 4 * sizeof(float);
+    unsigned int size = numBodies * 4 * sizeof(float); //change to 2D, size = numBodies * 2 * sizeof(float)
 
-    // TODO :: Modify initial positions!
-    float4* temppos = (float4*)malloc(numBodies*4*sizeof(float));
+    float4* temppos = (float4*)malloc(numBodies*4*sizeof(float)); // change to 2D
     for(int i = 0; i < numBodies; ++i)
-    {
+    {/*
       // Added in some fancy math to make them start out similar to the
       // demo video on the website.
       float rand_theta = ((float)rand()) / RAND_MAX * 2.0 * M_PI;
@@ -177,16 +177,17 @@ void createVBOs(GLuint* vbo)
       temppos[i].x = -8.0 + (i % 2) * 16.0 + rand_radius * cos(rand_theta) * cos(rand_phi);
       temppos[i].y = -8.0 + ((i / 2) % 2) * 16.0 + rand_radius * sin(rand_theta) * cos(rand_phi);
       temppos[i].z = rand_radius * sin(rand_phi);
-      temppos[i].w = 1.;
+      temppos[i].w = 1.;*/
+      // change to 2D
     }
 
     // Notice only vbo[0] has initial data!
-    glBufferData(GL_ARRAY_BUFFER, size, temppos, GL_DYNAMIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, size, temppos, GL_DYNAMIC_DRAW);
 
     free(temppos);
 
     // Create initial 'newPos' buffer
-    glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+    /*glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
 
 
@@ -194,9 +195,9 @@ void createVBOs(GLuint* vbo)
 
     // register buffer objects with CUDA
     gpuErrchk(cudaGLRegisterBufferObject(vbo[0]));
-    gpuErrchk(cudaGLRegisterBufferObject(vbo[1]));
+    gpuErrchk(cudaGLRegisterBufferObject(vbo[1]));*/
 }
-
+/*
 ////////////////////////////////////////////////////////////////////////////////
 //! Delete VBO
 ////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +212,7 @@ void deleteVBOs(GLuint* vbo)
     gpuErrchk(cudaGLUnregisterBufferObject(vbo[1]));
 
     *vbo = 0;
-}
+}*/
 
 ////////////////////////////////////////////////////////////////////////////////
 //! Delete device data

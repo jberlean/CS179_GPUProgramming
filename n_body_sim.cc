@@ -7,7 +7,7 @@
 #include <ctime>
 #include <cassert>
 
-#include "interact_kernel.cuh"
+#include "n_body_sim_cuda.cuh"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
