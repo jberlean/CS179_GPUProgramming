@@ -129,7 +129,6 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
     data_new[i].y = data_old[i].y + vels_new[i].y * dt;
 
-
     i += blockDim.x * gridDim.x;
   }
 }
