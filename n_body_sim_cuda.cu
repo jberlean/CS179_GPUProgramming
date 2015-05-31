@@ -1,4 +1,5 @@
 #include <curand.h>
+#include <cstdio>
 
 // macro for error-handling
 #define gpuErrChk(ans) { gpuAssert((ans), (char*)__FILE__, __LINE__); }
