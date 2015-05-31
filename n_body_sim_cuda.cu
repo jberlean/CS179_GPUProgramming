@@ -84,7 +84,6 @@ __device__
 float2 get_force(int pos, float3 * data_old, int num_particles) {
   // sum force from every other particle
   // based on mass, position of both particles
-<<<<<<< Updated upstream
   float2 force;
   force.x = 0;
   force.y = 0;

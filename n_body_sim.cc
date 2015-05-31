@@ -50,7 +50,7 @@ void run_simulation(
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
-    call_interact_kernel(dt, damping);
+    call_interact_kernel(dt);
 
     // Output frame data enough time steps have passed
     if (step % time_steps_per_frame == 0) {
