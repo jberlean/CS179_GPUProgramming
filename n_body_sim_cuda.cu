@@ -106,7 +106,7 @@ float2 get_force(int pos, float3 * data_old, int num_particles) {
 }
 
 __global__
-void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
+void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles, int * flag) {
   // each thread handles a particle
   int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -120,15 +120,26 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
     data_new[i].x += vels_new[i].x * dt; 
     data_new[i].y += vels_new[i].y * dt;
 
+    if (data_old[i].z == 1) *flag = 1;
+
     i += blockDim.x * gridDim.x;
   }
 }
 
 void call_interact_kernel(float dt) {
+  int * flag;
+  cudaMalloc(&flag, sizeof(int));
+  cudaMemset(flag, 0, sizeof(int));
+
   // call kernel
   interact_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                          particle_data[pingpong], particle_data[1 - pingpong], 
-                                                         dt, num_particles);
+                                                         dt, num_particles, flag);
+  int h_flag;
+  cudaMemcpy(&h_flag, flag, sizeof(int), cudaMemcpyDeviceToHost);
+ 
+  std::cout<< "FLAG " << h_flag << std::endl;
+
   // update pingpong
   pingpong = 1 - pingpong;
 }
