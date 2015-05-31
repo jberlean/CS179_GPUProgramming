@@ -117,3 +117,15 @@ void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   gpuErrChk(cudaMemcpy(h_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
   gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 }
+
+////////////////////////////////////////////////////////////////////////////////
+//! Gets/sets the number of bodies
+////////////////////////////////////////////////////////////////////////////////
+int get_num_bodies()
+{
+  return num_bodies;
+}
+void set_num_bodies(int n)
+{
+  num_bodies = n;
+}
