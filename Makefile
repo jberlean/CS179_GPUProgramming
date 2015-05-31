@@ -39,14 +39,14 @@ else
       NVCCFLAGS := -m64
 endif
 
-TARGETS = particles_interact
+TARGETS = n_body_sim
 
 all: $(TARGETS)
 
-particles_interact: particles_interact.cc interact_kernel.o
-	$(CC) $< -o $@ interact_kernel.o -O3 -I$(CUDA_INC_PATH) $(LDFLAGS) $(LD_FLAGS) -Wall
+n_body_sim: n_body_sim.cc n_body_sim.o
+	$(CC) $< -o $@ n_body_sim.o -O3 -I$(CUDA_INC_PATH) $(LDFLAGS) $(LD_FLAGS) -Wall
 
-interact_kernel.o: interact_kernel.cu
+n_body_sim.o: n_body_sim_cuda.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -I$(CC_INCLUDE) -o $@ -c $<
 
 
