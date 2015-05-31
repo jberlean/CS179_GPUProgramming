@@ -11,10 +11,10 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data(char *output_file, float *particle_data, float *particle_vels, int num_particles, float width, float height) {
+void output_data(char *output_file, float *particle_data, float *particle_vels, int frame_num, int num_particles, float width, float height) {
   std::ofstream out(output_file);
 
-  out << num_particles << "," << width << "," << height << std::endl;
+  out << frame_num << "," << num_particles << "," << width << "," << height << std::endl;
   for (int i = 0; i < num_particles; i++) {
     out << particle_data[i*3] << "," << particle_data[i*3 + 1] << "," << particle_data[i*3 + 2] << std::endl;
   }
@@ -61,7 +61,7 @@ void run_simulation(
       sprintf(output_file, "./output/data_%d.dat", step);
 
       // Output data
-      output_data(output_file, particle_data, particle_vels, num_particles, width, height);
+      output_data(output_file, particle_data, particle_vels, step/time_steps_per_frame, num_particles, width, height);
     }
   }
 
