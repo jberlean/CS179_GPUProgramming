@@ -31,13 +31,12 @@ void run_simulation(
     float total_time,
     int num_time_steps,
     int time_steps_per_frame) {
-  float dt, damping;
+  float dt;
 
   float *particle_data, *particle_vels;
 
   // Set system parameters
   dt = total_time / num_time_steps;
-  damping = 0.995;
 
   // Allocate data structures on host
   particle_data = new float[num_particles * 3 * sizeof(float)];
@@ -50,7 +49,7 @@ void run_simulation(
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
-    call_interact_kernel(dt, damping);
+    call_interact_kernel(dt);
 
     // Output frame data enough time steps have passed
     if (step % time_steps_per_frame == 0) {
