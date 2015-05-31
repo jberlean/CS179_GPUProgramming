@@ -1,6 +1,8 @@
 #include <curand.h>
 #include <cstdio>
 
+#include <cuda_runtime.h>
+
 // macro for error-handling
 #define gpuErrChk(ans) { gpuAssert((ans), (char*)__FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)

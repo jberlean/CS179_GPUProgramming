@@ -1,31 +1,28 @@
-### CHANGE THESE LINES TO MATCH YOUR SYSTEM        ###
-### COMPILER PATH                                  ###
 CC = /usr/bin/g++
-### CUDA FOLDER PATH                               ###
-CUDA_PATH       ?= /usr/local/cuda-6.5
-# CUDA code generation flags
-GENCODE_FLAGS   := -gencode arch=compute_30,code=sm_30
-######################################################
 
+LD_FLAGS = -lrt
+
+CUDA_PATH       ?= /usr/local/cuda-6.5
 CUDA_INC_PATH   ?= $(CUDA_PATH)/include
 CUDA_BIN_PATH   ?= $(CUDA_PATH)/bin
-CUDA_LIB_PATH   ?= $(CUDA_PATH)/lib
+CUDA_LIB_PATH   ?= $(CUDA_PATH)/lib64
 
-CC_INCLUDE = $(CUDA_PATH)/samples/common/inc
+# CUDA code generation flags
+GENCODE_FLAGS   := -gencode arch=compute_20,code=sm_20 -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35
 
 # Common binaries
 NVCC            ?= $(CUDA_BIN_PATH)/nvcc
 
 # OS-specific build flags
 ifneq ($(DARWIN),)
-      LDFLAGS   := -Xlinker -rpath $(CUDA_LIB_PATH) -L$(CUDA_LIB_PATH) -lcudart
+      LDFLAGS   := -Xlinker -rpath $(CUDA_LIB_PATH) -L$(CUDA_LIB_PATH) -lcudart -lcufft -lcurand
       CCFLAGS   := -arch $(OS_ARCH)
 else
   ifeq ($(OS_SIZE),32)
-      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart
+      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart -lcufft -lcurand
       CCFLAGS   := -m32
   else
-      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart
+      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart -lcufft -lcurand
       CCFLAGS   := -m64
   endif
 endif
@@ -37,16 +34,16 @@ else
       NVCCFLAGS := -m64
 endif
 
+
 TARGETS = n_body_sim
 
 all: $(TARGETS)
 
-n_body_sim: n_body_sim.cc n_body_sim.o
-	$(CC) $< -o $@ n_body_sim.o -O3 -I$(CUDA_INC_PATH) $(LDFLAGS) $(LD_FLAGS) -Wall
+n_body_sim: n_body_sim.cc n_body_sim_cuda.o
+	$(CC) $< -o $@ n_body_sim_cuda.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
 
-n_body_sim.o: n_body_sim_cuda.cu
-	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -I$(CC_INCLUDE) -o $@ -c $<
-
+n_body_sim_cuda.o: n_body_sim_cuda.cu
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 clean:
 	rm -f *.o $(TARGETS)

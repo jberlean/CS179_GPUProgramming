@@ -31,13 +31,12 @@ void run_simulation(
     float total_time,
     int num_time_steps,
     int time_steps_per_frame) {
-  float dt, damping;
+  float dt;
 
   float *particle_data, *particle_vels;
 
   // Set system parameters
   dt = total_time / num_time_steps;
-  damping = 0.995;
 
   // Allocate data structures on host
   particle_data = new float[num_particles * 3 * sizeof(float)];
