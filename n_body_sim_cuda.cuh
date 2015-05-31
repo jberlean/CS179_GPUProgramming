@@ -1,7 +1,6 @@
 // -*- C++ -*-
 #ifndef N_BODY_SIM_CUDA_CUH
 #define N_BODY_SIM_CUDA_CUH
-#include <cuda_runtime.h>
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
                float max_vel, int h_num_blocks, int h_num_threads_per_block);

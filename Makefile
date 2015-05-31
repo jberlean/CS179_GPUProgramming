@@ -15,14 +15,14 @@ NVCC            ?= $(CUDA_BIN_PATH)/nvcc
 
 # OS-specific build flags
 ifneq ($(DARWIN),)
-      LDFLAGS   := -Xlinker -rpath $(CUDA_LIB_PATH) -L$(CUDA_LIB_PATH) -lcudart -lcufft
+      LDFLAGS   := -Xlinker -rpath $(CUDA_LIB_PATH) -L$(CUDA_LIB_PATH) -lcudart -lcufft -lcurand
       CCFLAGS   := -arch $(OS_ARCH)
 else
   ifeq ($(OS_SIZE),32)
-      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart -lcufft
+      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart -lcufft -lcurand
       CCFLAGS   := -m32
   else
-      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart -lcufft
+      LDFLAGS   := -L$(CUDA_LIB_PATH) -lcudart -lcufft -lcurand
       CCFLAGS   := -m64
   endif
 endif
@@ -39,7 +39,7 @@ TARGETS = n_body_sim
 
 all: $(TARGETS)
 
-n_body_sim: n_body_sim.cc n_body_sim.o
+n_body_sim: n_body_sim.cc n_body_sim_cuda.o
 	$(CC) $< -o $@ n_body_sim_cuda.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
 
 n_body_sim_cuda.o: n_body_sim_cuda.cu
