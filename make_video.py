@@ -8,9 +8,7 @@ import math
 
 
 # Get command-line argument
-if len(sys.argv) != 2:
-  print "Please provide the data file as a single command-line argument."
-  return
+assert (len(sys.argv) == 2), "Please provide the data file as a single command-line argument."
 infile = os.path.realpath(sys.argv[1])
 
 # Make output folder if it doesn't exist
@@ -25,8 +23,14 @@ print "Output will be in folder {0}".format(outfolder)
 f = open(infile, 'r')
 
 # Read header line
-num_particles, width, height, total_time, num_time_steps, time_steps_per_frame = f.readline().split(" ")
-num_frames = math.ceil(float(num_time_steps) / time_steps_per_frame)
+line = f.readline().split(" ")
+num_particles = int(line[0])
+width = float(line[1])
+height = float(line[2])
+total_time = float(line[3])
+num_time_steps = int(line[4])
+time_steps_per_frame = int(line[5])
+num_frames = int(math.ceil(float(num_time_steps) / time_steps_per_frame))
 
 print "Reading data file from simulation with the following parameters:"
 print "\tNumber of particles: {0}".format(num_particles)
@@ -41,13 +45,13 @@ pngs = [[]] * num_frames
 
 for frames_processed in range(num_frames):
   frame_num = int(f.readline())
-  outfile = os.realpath(os.join(outfolder, "frame{0}.png".format(frame_num)))
+  outfile = os.path.realpath(os.path.join(outfolder, "frame{0}.png".format(frame_num)))
 
   im = Image.new("RGB", (int(width), int(height)), "white")
 
   draw = ImageDraw.Draw(im)
 
-  for particle in num_particles:
+  for particle in range(num_particles):
     line = f.readline().split(" ")
     if len(line) != 3:
       print "WARNING: Expected a line of particle data, but got \"{0}\"".format(" ".join(line))
@@ -56,7 +60,7 @@ for frames_processed in range(num_frames):
     y = float(line[1])
     mass = float(line[2])
 
-    rad = max(1.5, sqrt(mass/math.pi)) - 0.5
+    rad = max(1.5, math.sqrt(mass/math.pi)) - 0.5
 
     min_x = x - rad
     max_x = x + rad
@@ -74,16 +78,23 @@ for frames_processed in range(num_frames):
   im.save(outfile)
   pngs[frame_num] = outfile
 
-  print "Saved frame {0} in file: {1})".format(frame_num, outfile)
+  if frame_num % 100 == 0:
+    print "Saved frame {0} in file: {1})".format(frame_num, outfile)
+
+f.close()
 
 #from moviepy.video.VideoClip import ImageClip
 #from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 import moviepy.editor as mpy
 
-clips = [mpy.ImageClip(png, duration = .1) for n, png in pngs]
+fps = num_frames / total_time * 10
+clips = [mpy.ImageClip(png, duration = 1 / fps) for png in pngs]
 
 #video = CompositeVideoClip(clips)
+outfile = os.path.realpath(os.path.join(outfolder, "movie.mp4"))
+
 video = mpy.concatenate_videoclips(clips)
-video.write_videofile("output/output.mp4", fps = 24, write_logfile = True)
+video.write_videofile(outfile, fps = fps, write_logfile = True)
+print "Video output to: {0}".format(outfile)
 #video.write_gif("output/output.gif", fps = 10)
 
