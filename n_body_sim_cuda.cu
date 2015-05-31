@@ -32,10 +32,8 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   while (i < num_particles)
   {
-    //vels_buffer[i].x = min_vel + random[4 * i] * (max_vel - min_vel);
-    //vels_buffer[i].y = min_vel + random[4 * i + 1] * (max_vel - min_vel);
-    vels_buffer[i].x = 0;
-    vels_buffer[i].y = 0;
+    vels_buffer[i].x = min_vel + random[4 * i] * (max_vel - min_vel);
+    vels_buffer[i].y = min_vel + random[4 * i + 1] * (max_vel - min_vel);
     data_buffer1[i].x = random[4 * i + 2] * box_width;
     data_buffer1[i].y = random[4 * i + 3] * box_height;
     data_buffer1[i].z = 1;
@@ -47,6 +45,8 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
       data_buffer2[i].z = 1000;
       data_buffer1[i].x = box_width / 2;
       data_buffer1[i].y = box_height / 2;
+      vels_buffer[i].x = 0;
+      vels_buffer[i].y = 0;
     }
 
     i += blockDim.x * gridDim.x;
@@ -106,7 +106,7 @@ float2 get_force(int pos, float3 * data_old, int num_particles) {
 
     if (dist_squared > 0)
     {
-      float force_magnitude = data_old[pos].z * data_old[i].z / dist_squared;
+      float force_magnitude = data_old[pos].z * data_old[i].z / (dist_squared + 1);
       force.x += (data_old[i].x - data_old[pos].x) * force_magnitude / sqrt(dist_squared);
       force.y += (data_old[i].y - data_old[pos].y) * force_magnitude / sqrt(dist_squared);
     }
