@@ -16,7 +16,7 @@ void output_data(char *output_file, float *particle_data, float *particle_vels, 
 
   out << num_particles << "," << width << "," << height << std::endl;
   for (int i = 0; i < num_particles; i++) {
-    out << particle_data[0] << "," << particle_data[1] << "," << particle_data[2] << std::endl;
+    out << particle_data[i*3] << "," << particle_data[i*3 + 1] << "," << particle_data[i*3 + 2] << std::endl;
   }
 
   out.close();
@@ -50,7 +50,7 @@ void run_simulation(
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
-    call_interact_kernel(dt, damping);
+    call_interact_kernel(dt);
 
     // Output frame data enough time steps have passed
     if (step % time_steps_per_frame == 0) {
