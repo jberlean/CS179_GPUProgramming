@@ -11,7 +11,7 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data(char *output_file, float *particle_data, float *particle_vels, unsigned int num_particles, float width, float height) {
+void output_data(char *output_file, float *particle_data, float *particle_vels, int num_particles, float width, float height) {
   std::ofstream out(output_file);
 
   out << num_particles << "," << width << "," << height << std::endl;
@@ -23,9 +23,9 @@ void output_data(char *output_file, float *particle_data, float *particle_vels, 
 }
 
 void run_simulation(
-    unsigned int num_blocks,
-    unsigned int threads_per_block,
-    unsigned int num_particles,
+    int num_blocks,
+    int num_threads_per_block,
+    int num_particles,
     float width,
     float height,
     float total_time,
@@ -45,12 +45,12 @@ void run_simulation(
 
   // Initialze data structures
   float v_max = std::min(width, height) / 100.0;
-  init_data(num_particles, width, height, -v_max, v_max);
+  init_data(num_blocks, num_threads_per_block, num_particles, width, height, -v_max, v_max);
 
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
-    call_interact_kernel(num_blocks, threads_per_block, dt, damping);
+    call_interact_kernel(dt, damping);
 
     // Output frame data enough time steps have passed
     if (step % time_steps_per_frame == 0) {
@@ -79,26 +79,26 @@ void run_simulation(
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
-  unsigned int num_blocks, threads_per_block;
+  int num_blocks, num_threads_per_block;
 
-  unsigned int num_particles;
-  unsigned int width, height;
+  int num_particles;
+  float width, height;
 
   float total_time;
-  unsigned int num_time_steps;
+  int num_time_steps;
 
-  unsigned int time_steps_per_frame;
+  int time_steps_per_frame;
 
   // Set command-line arguments
   if(argc < 9) {
-      printf("Usage: n_body_sim <num-blocks> <threads-per-block> <N> <width> <height> <total-time> <num-time-steps> <time-steps-per-frame>\n");
+      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> <width> <height> <total-time> <num-time-steps> <time-steps-per-frame>\n");
       exit(1);
   }
   num_blocks = atoi(argv[1]);
-  threads_per_block = atoi(argv[2]);
+  num_threads_per_block = atoi(argv[2]);
   num_particles = atoi(argv[3]);
-  width = atoi(argv[4]);
-  height = atoi(argv[5]);
+  width = atof(argv[4]);
+  height = atof(argv[5]);
   total_time = atof(argv[6]);
   num_time_steps = atoi(argv[7]);
   time_steps_per_frame = atoi(argv[8]);
@@ -110,5 +110,5 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  run_simulation(num_blocks, threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
+  run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
 }
