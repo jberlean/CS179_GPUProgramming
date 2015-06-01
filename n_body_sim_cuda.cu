@@ -47,7 +47,7 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
 
     data_buffer2[i].z = 1;    
 
-    if (i == 0) {
+/*    if (i == 0) {
       data_buffer1[i].z = 1000;
       data_buffer2[i].z = 1000;
       data_buffer1[i].x = box_width / 2;
@@ -55,6 +55,7 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
       vels_buffer[i].x = 0;
       vels_buffer[i].y = 0;
     }
+*/
 
     i += blockDim.x * gridDim.x;
   }
