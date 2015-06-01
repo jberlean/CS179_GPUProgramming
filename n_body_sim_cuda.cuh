@@ -2,8 +2,11 @@
 #ifndef N_BODY_SIM_CUDA_CUH
 #define N_BODY_SIM_CUDA_CUH
 
+#define SIMPLE 1
+#define PXP 2
+
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
-               float max_vel, int h_num_blocks, int h_num_threads_per_block);
+               float max_vel, int h_num_blocks, int h_num_threads_per_block, int algorithm);
 
 void delete_data();
 

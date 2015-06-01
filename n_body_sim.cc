@@ -34,7 +34,8 @@ void run_simulation(
     float height,
     float total_time,
     int num_time_steps,
-    int time_steps_per_frame) {
+    int time_steps_per_frame,
+    int algorithm) {
   float dt;
   std::ofstream out;
 
@@ -54,7 +55,7 @@ void run_simulation(
 
   // Initialze data structures
   float v_max = std::min(width, height) / 100.0;
-  init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block);
+  init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block, algorithm);
 
   // Output header for data file
   output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
@@ -92,7 +93,7 @@ void run_simulation(
 int main(int argc, char** argv)
 {
   int num_blocks, num_threads_per_block;
-
+  int algorithm;
   int num_particles;
   float width, height;
 
@@ -108,12 +109,19 @@ int main(int argc, char** argv)
     total_time = 10;
     num_time_steps = 1000;
     time_steps_per_frame = 10;
-  } else if (argc == 9) {
+    algorithm = SIMPLE;
+  } else if (argc == 10) {
     width = atof(argv[4]);
     height = atof(argv[5]);
     total_time = atof(argv[6]);
     num_time_steps = atoi(argv[7]);
     time_steps_per_frame = atoi(argv[8]);
+
+    if (atoi(argv[9]) == 1)
+      algorithm = SIMPLE;
+    else if (atoi(argv[9] == 2)
+      algorithm = PXP;   
+
   } else {
       printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n");
       exit(1);
@@ -130,5 +138,6 @@ int main(int argc, char** argv)
   }
 
   // Run simulation with given parameters
-  run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
+  run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, 
+                 time_steps_per_frame, algorithm);
 }

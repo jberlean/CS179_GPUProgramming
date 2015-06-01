@@ -3,6 +3,8 @@
 
 #include <cuda_runtime.h>
 
+#include "n_body_sim_cuda.cuh"
+
 // macro for error-handling
 #define gpuErrChk(ans) { gpuAssert((ans), (char*)__FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)
@@ -22,6 +24,9 @@ int num_particles;
  
 int num_blocks;
 int num_threads_per_block;
+
+// Algorithm to use.
+int algorithm;
 
 // Device buffer variables
 float2* particle_vels[2]; // x and y represent velocity in 2D
@@ -56,11 +61,12 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
 }
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
-               float max_vel, int h_num_blocks, int h_num_threads_per_block) 
+               float max_vel, int h_num_blocks, int h_num_threads_per_block, int h_algorithm) 
 {
   num_particles = h_num_particles;
   num_blocks = h_num_blocks;
   num_threads_per_block = h_num_threads_per_block;
+  algorithm = h_algorithm;
 
   // instantiate particle_vels, particle_data on GPU
   gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float2) * num_particles));
@@ -94,7 +100,7 @@ void delete_data() {
 }
 
 __device__
-float2 get_force(int pos, float3 * data_old, int num_particles) {
+float2 get_force(float3 pos_data, float3 * data_old, int num_particles, f) {
   // sum force from every other particle based on mass, position of both particles
   float2 force;
   force.x = 0;
@@ -102,28 +108,28 @@ float2 get_force(int pos, float3 * data_old, int num_particles) {
 
   for (int i = 0; i < num_particles; i++)
   {
-    float dist_squared = pow((data_old[pos].x - data_old[i].x), 2) 
-                         + pow((data_old[pos].y - data_old[i].y), 2);  
+    float dist_squared = pow((pos_data.x - data_old[i].x), 2) 
+                         + pow((pos_data.y - data_old[i].y), 2);  
 
     if (dist_squared > 0)
     {
       float SOFT_FACTOR = 1.0; 
-      float force_magnitude = data_old[pos].z * data_old[i].z / (dist_squared + SOFT_FACTOR);
-      force.x += (data_old[i].x - data_old[pos].x) * force_magnitude / sqrt(dist_squared);
-      force.y += (data_old[i].y - data_old[pos].y) * force_magnitude / sqrt(dist_squared);
+      float force_magnitude = pos_data.z * data_old[i].z / (dist_squared + SOFT_FACTOR);
+      force.x += (data_old[i].x - pos_data.x) * force_magnitude / sqrt(dist_squared);
+      force.y += (data_old[i].y - pos_data.y) * force_magnitude / sqrt(dist_squared);
     }
   }
   return force;  
 }
 
 __global__
-void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
+void simple_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
   // each thread handles a particle
   int i = blockIdx.x * blockDim.x + threadIdx.x;
 
   while (i < num_particles)
   {
-    float2 force = get_force(i, data_old, num_particles);
+    float2 force = get_force(data_old[i], data_old, num_particles);
     
     vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z;
     vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
@@ -135,12 +141,54 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
   }
 }
 
+__global__
+void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
+  extern __shared__ float3 sdata[];
+  
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int tid = threadIdx.x;
+  
+  while (i < num_particles)
+  {
+    float2 force;
+    force.x = 0;
+    force.y = 0;
+
+    // NOTE: num_particles is a multiple of num_threads_per_block.
+    for (int num_tile = 0; num_tile * blockDim.x < num_particles; num_tile++)
+    {
+      sdata[tid] = num_tile * blockDim.x + tid;
+      __syncthreads();
+      force += get_force(data_old[i], sdata, blockDim.x);
+      __syncthreads();
+    }    
+    
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z;
+    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
+    
+    data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
+    data_new[i].y = data_old[i].y + vels_new[i].y * dt;
+
+    i += blockDim.x * gridDim.x;
+    __syncthreads();
+  }
+}
+ 
 void call_interact_kernel(float dt) {
   // call kernel
-  interact_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
-                                                         particle_data[pingpong], particle_data[1 - pingpong], 
-                                                         dt, num_particles);
-
+  if (algorithm == SIMPLE)
+  {
+    simple_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
+                                                           particle_data[pingpong], particle_data[1 - pingpong], 
+                                                           dt, num_particles);
+  }
+  else if (algorithm == PXP)
+  {
+    pxp_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
+                                                        (particle_vels[pingpong], particle_vels[1 - pingpong], 
+                                                           particle_data[pingpong], particle_data[1 - pingpong], 
+                                                           dt, num_particles);
+  }
   // update pingpong
   pingpong = 1 - pingpong;
 }
