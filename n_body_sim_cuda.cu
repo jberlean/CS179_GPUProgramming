@@ -152,18 +152,18 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
   {
     float2 force;
     force.x = 0;
-    force.y = 0;
+    force.y = 0; TODO
 
     float3 pos_data = data_old[i];
     // NOTE: num_particles is a multiple of num_threads_per_block.
     for (int num_tile = 0; num_tile * blockDim.x < num_particles; num_tile++)
     {
+      __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
       float2 block_force = get_force(pos_data, sdata, blockDim.x);
       force.x += block_force.x;
       force.y += block_force.y;
-      __syncthreads();
     }    
     
     vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
@@ -173,7 +173,6 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
     data_new[i].y = data_old[i].y + vels_new[i].y * dt;
 
     i += blockDim.x * gridDim.x;
-    __syncthreads();
   }
 }
  
