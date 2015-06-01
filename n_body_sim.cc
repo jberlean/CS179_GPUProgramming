@@ -123,7 +123,7 @@ int main(int argc, char** argv)
       algorithm = PXP;   
 
   } else {
-      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n");
+      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame> <algorithm>]\n");
       exit(1);
   }
   num_blocks = atoi(argv[1]);
