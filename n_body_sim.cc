@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 
     if (atoi(argv[9]) == 1)
       algorithm = SIMPLE;
-    else if (atoi(argv[9] == 2)
+    else if (atoi(argv[9]) == 2)
       algorithm = PXP;   
 
   } else {
