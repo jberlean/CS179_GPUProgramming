@@ -9,7 +9,7 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame) {
+void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, float v_max) {
   out << num_particles << " "
       << width << " "
       << height << " "
@@ -43,7 +43,7 @@ void run_simulation(
 
   // Setup output stuff (filename and output stream)
   char output_file[200];
-  sprintf(output_file, "./output/data_%d.dat", time(NULL));
+  sprintf(output_file, "./output/data_%d.dat", (int)time(NULL));
   out.open(output_file);
 
   // Set system parameters
@@ -54,11 +54,11 @@ void run_simulation(
   particle_vels = new float[num_particles * 2 * sizeof(float)];
 
   // Initialze data structures
-  float v_max = std::min(width, height) / 100.0;
+  float v_max = std::min(width, height) / 1000.0;
   init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block, algorithm);
 
   // Output header for data file
-  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
+  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, v_max);
 
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
