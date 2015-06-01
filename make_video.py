@@ -45,11 +45,17 @@ print "\tNumber of frames: {0}".format(num_frames)
 
 pngs = [[]] * num_frames
 
+density = num_particles / (width * height)
+if density > 1/16.0:
+  transparency = int(256 * (1 / density / 16))
+else:
+  transparency = 255
+
 for frames_processed in range(num_frames):
   frame_num = int(f.readline())
   outfile = os.path.realpath(os.path.join(outfolder, "frame{0}.png".format(frame_num)))
 
-  im = Image.new("RGB", (int(width), int(height)), "white")
+  im = Image.new("RGBA", (int(width), int(height)), "white")
 
   draw = ImageDraw.Draw(im)
 
@@ -74,8 +80,13 @@ for frames_processed in range(num_frames):
     min_y = min(max(min_y, 0), int(height - 1))
     max_y = min(max(max_y, 0), int(height - 1))
 
-    #im.putpixel((int(x), int(y)), (0, 0, 0))
-    draw.ellipse([(min_x, min_y), (max_x, max_y)], fill = (0,0,0), outline = (0,0,0))
+    #dot = Image.new("RGBA", (int(width), int(height)), (255,255,255,0))
+    #draw = ImageDraw.Draw(dot)
+    color = (0, 0, 0, transparency)
+    draw.ellipse([(min_x, min_y), (max_x, max_y)], fill = color, outline = color)
+
+    #im = Image.alpha_composite(im, dot)
+
 
   im.save(outfile)
   pngs[frame_num] = outfile
@@ -96,8 +107,8 @@ video = mpy.ImageSequenceClip(pngs, fps = fps)
 video.write_videofile(mp4_outfile, fps = fps, write_logfile = True)
 print "Video output to: {0}".format(mp4_outfile)
 
-video.write_gif(gif_outfile, fps = fps)
-print "GIF output to: {0}".format(gif_outfile)
+#video.write_gif(gif_outfile, fps = fps)
+#print "GIF output to: {0}".format(gif_outfile)
 
 if CLEANUP:
   [os.remove(png) for png in pngs]
