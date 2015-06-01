@@ -6,6 +6,8 @@ import os
 import sys
 import math
 
+CLEANUP = True
+
 
 # Get command-line argument
 assert (len(sys.argv) == 2), "Please provide the data file as a single command-line argument."
@@ -79,22 +81,23 @@ for frames_processed in range(num_frames):
   pngs[frame_num] = outfile
 
   if frame_num % 100 == 0:
-    print "Saved frame {0} in file: {1})".format(frame_num, outfile)
+    print "Saved frame {0} in file: {1}".format(frame_num, outfile)
 
 f.close()
 
-#from moviepy.video.VideoClip import ImageClip
-#from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 import moviepy.editor as mpy
 
 fps = num_frames / total_time * 10
-clips = [mpy.ImageClip(png, duration = 1 / fps) for png in pngs]
+mp4_outfile = os.path.realpath(os.path.join(outfolder, "movie.mp4"))
+gif_outfile = os.path.realpath(os.path.join(outfolder, "movie.gif"))
 
-#video = CompositeVideoClip(clips)
-outfile = os.path.realpath(os.path.join(outfolder, "movie.mp4"))
+video = mpy.ImageSequenceClip(pngs, fps = fps)
 
-video = mpy.concatenate_videoclips(clips)
-video.write_videofile(outfile, fps = fps, write_logfile = True)
-print "Video output to: {0}".format(outfile)
-#video.write_gif("output/output.gif", fps = 10)
+video.write_videofile(mp4_outfile, fps = fps, write_logfile = True)
+print "Video output to: {0}".format(mp4_outfile)
 
+video.write_gif(gif_outfile, fps = fps)
+print "GIF output to: {0}".format(gif_outfile)
+
+if CLEANUP:
+  [os.remove(png) for png in pngs]
