@@ -100,7 +100,7 @@ void delete_data() {
 }
 
 __device__
-float2 get_force(float3 pos_data, float3 * data_old, int num_particles, f) {
+float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
   // sum force from every other particle based on mass, position of both particles
   float2 force;
   force.x = 0;
@@ -157,9 +157,11 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
     // NOTE: num_particles is a multiple of num_threads_per_block.
     for (int num_tile = 0; num_tile * blockDim.x < num_particles; num_tile++)
     {
-      sdata[tid] = num_tile * blockDim.x + tid;
+      sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      force += get_force(data_old[i], sdata, blockDim.x);
+      float2 block_force = get_force(data_old[i], sdata, blockDim.x)
+      force.x += block_force.x;
+      force.y += block_force.y;
       __syncthreads();
     }    
     
