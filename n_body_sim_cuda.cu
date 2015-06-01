@@ -159,7 +159,7 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
     {
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      float2 block_force = get_force(data_old[i], sdata, blockDim.x)
+      float2 block_force = get_force(data_old[i], sdata, blockDim.x);
       force.x += block_force.x;
       force.y += block_force.y;
       __syncthreads();
