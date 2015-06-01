@@ -15,7 +15,8 @@ void output_data_header(std::ofstream &out, int num_particles, float width, floa
       << height << " "
       << total_time << " "
       << num_time_steps << " "
-      << time_steps_per_frame << std::endl;
+      << time_steps_per_frame << " " 
+      << algorithm << std::endl;
 
 }
 
