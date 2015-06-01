@@ -9,13 +9,14 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, float v_max, int algo) {
+void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, float v_max, int algorithm) {
   out << num_particles << " "
       << width << " "
       << height << " "
       << total_time << " "
       << num_time_steps << " "
       << time_steps_per_frame << " " 
+      << v_max << " "
       << algorithm << std::endl;
 
 }
@@ -59,7 +60,7 @@ void run_simulation(
   init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block, algorithm);
 
   // Output header for data file
-  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, v_max);
+  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, v_max, algorithm);
 
   // Run <time_steps> iterations of simulation
   for (int step = 0; step < num_time_steps; step++) {
@@ -94,7 +95,7 @@ void run_simulation(
 int main(int argc, char** argv)
 {
   int num_blocks, num_threads_per_block;
-  int algorithm;
+  int algorithm=-1;
   int num_particles;
   float width, height;
 
