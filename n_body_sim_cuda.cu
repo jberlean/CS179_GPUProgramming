@@ -113,7 +113,7 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
 
     if (dist_squared > 0)
     {
-      float SOFT_FACTOR = 1.0; 
+      float SOFT_FACTOR = 10; 
       float force_magnitude = pos_data.z * data_old[i].z / (dist_squared + SOFT_FACTOR);
       force.x += (data_old[i].x - pos_data.x) * force_magnitude / sqrt(dist_squared);
       force.y += (data_old[i].y - pos_data.y) * force_magnitude / sqrt(dist_squared);
