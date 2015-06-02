@@ -63,9 +63,16 @@ void run_simulation(
   output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, v_max, algorithm);
 
   // Run <time_steps> iterations of simulation
+  int status_counter = 0;
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
     call_interact_kernel(dt);
+
+    status_counter += num_particles;
+    if (status_counter > 1000000) {
+      std::cout << "Run " << step << " time steps\n";
+      status_counter = 0;
+    }
 
     // Output frame data enough time steps have passed
     if (step % time_steps_per_frame == 0) {
@@ -123,6 +130,8 @@ int main(int argc, char** argv)
       algorithm = SIMPLE;
     else if (atoi(argv[9]) == 2)
       algorithm = PXP;   
+    else if (atoi(argv[9]) == 3)
+      algorithm = PXP_OPT;
 
   } else {
       printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame> <algorithm>]\n");

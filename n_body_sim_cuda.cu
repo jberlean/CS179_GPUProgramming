@@ -1,5 +1,6 @@
 #include <curand.h>
 #include <cstdio>
+#include <iostream>
 
 #include <cuda_runtime.h>
 
@@ -107,18 +108,56 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
   force.x = 0;
   force.y = 0;
 
+  float3 other_data; // saves about 3s @ 128 threads/block and 1024 particles to store data_old[i], x_dist, and y_dist locally
+  float x_dist, y_dist, dist_squared;
+
+  float force_magnitude;
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i++)
   {
-    float dist_squared = pow((pos_data.x - data_old[i].x), 2) 
-                         + pow((pos_data.y - data_old[i].y), 2);  
+    other_data = data_old[i];
+    x_dist = pos_data.x - other_data.x;
+    y_dist = pos_data.y - other_data.y;
+    dist_squared = x_dist * x_dist + y_dist * y_dist; 
 
     if (dist_squared > 0)
     {
-      float SOFT_FACTOR = 10; 
-      float force_magnitude = pos_data.z * data_old[i].z / (dist_squared + SOFT_FACTOR);
-      force.x += (data_old[i].x - pos_data.x) * force_magnitude / sqrt(dist_squared);
-      force.y += (data_old[i].y - pos_data.y) * force_magnitude / sqrt(dist_squared);
+      force_magnitude = pos_data.z * other_data.z / (dist_squared + soft_factor);
+      force.x += x_dist * force_magnitude / sqrt(dist_squared);
+      force.y += y_dist * force_magnitude / sqrt(dist_squared);
     }
+  }
+  return force;  
+}
+
+__device__
+float2 get_force_opt(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum force from every other particle based on mass, position of both particles
+  float2 force = {0, 0};
+
+  float3 other_data1, other_data2;
+  float x_dist, y_dist, dist_cubed;
+
+  float force_magnitude;
+  for (int i = 0; i < num_particles; i+=2)
+  {
+    other_data1 = data_old[i];
+    other_data2 = data_old[i + 1];
+    x_dist = pos_data.x - other_data1.x;
+    y_dist = pos_data.y - other_data1.y;
+    dist_cubed = pow(x_dist * x_dist + y_dist * y_dist + SOFT_FACTOR, 1.5); 
+
+    force_magnitude = pos_data.z * other_data1.z / dist_cubed; 
+    force.x += x_dist * force_magnitude;
+    force.y += y_dist * force_magnitude;
+
+    x_dist = pos_data.x - other_data2.x;
+    y_dist = pos_data.y - other_data2.y;
+    dist_cubed = pow(x_dist * x_dist + y_dist * y_dist + SOFT_FACTOR, 1.5);
+
+    force_magnitude = pos_data.z * other_data2.z / dist_cubed;
+    force.x += x_dist * force_magnitude;
+    force.y += y_dist * force_magnitude;
   }
   return force;  
 }
@@ -153,7 +192,7 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
   {
     float2 force;
     force.x = 0;
-    force.y = 0; TODO
+    force.y = 0; //TODO
 
     float3 pos_data = data_old[i];
     // NOTE: num_particles is a multiple of num_threads_per_block.
@@ -188,7 +227,7 @@ void pxp_opt_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, flo
   {
     float2 force;
     force.x = 0;
-    force.y = 0; TODO
+    force.y = 0; //TODO
 
     float3 pos_data = data_old[i];
     // NOTE: num_particles is a multiple of num_threads_per_block.
@@ -197,7 +236,7 @@ void pxp_opt_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, flo
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      float2 block_force = get_force(pos_data, sdata, blockDim.x);
+      float2 block_force = get_force_opt(pos_data, sdata, blockDim.x);
       force.x += block_force.x;
       force.y += block_force.y;
     }    
@@ -216,14 +255,12 @@ void call_interact_kernel(float dt) {
   // call kernel
   if (algorithm == SIMPLE)
   {
-    std::cout << "Running SIMPLE algorithm...\n";
     simple_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
   }
   else if (algorithm == PXP)
   {
-    std::cout << "Running PxP algorithm...\n";
     pxp_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
                                                         (particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
@@ -231,13 +268,12 @@ void call_interact_kernel(float dt) {
   }
   else if (algorithm == PXP_OPT)
   {
-    std::cout << "Running optimized PxP algorithm...\n";
     pxp_opt_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
                                                         (particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
   } else {
-    std::cout << "Invalid algorithm supplied!";
+    std::cout << "Invalid algorithm supplied: " << algorithm << "\n";
   }
 
   // update pingpong

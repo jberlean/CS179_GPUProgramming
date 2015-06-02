@@ -6,6 +6,8 @@
 #define PXP 2
 #define PXP_OPT 3
 
+#define SOFT_FACTOR 10.0
+
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
                float max_vel, int h_num_blocks, int h_num_threads_per_block, int algorithm);
 
