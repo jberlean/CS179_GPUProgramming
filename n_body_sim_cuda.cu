@@ -323,6 +323,8 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
     y_dist8 = pos_data.y - other_data8.y;
     dist_cubed8 = pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + SOFT_FACTOR, 1.5);    
 
+    force_magnitude8 = pos_data.z * other_data8.z / dist_cubed8; 
+
     force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
                x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4 +
                x_dist5 * force_magnitude5 + x_dist6 * force_magnitude6 + 
