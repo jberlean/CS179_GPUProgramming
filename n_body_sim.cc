@@ -31,12 +31,12 @@ void output_data(std::ofstream &out, float *particle_data, float *particle_vels,
 void load_input_file(char *infile,
     int &num_blocks, int &num_threads_per_block,
     int &num_particles, float &width, float &height,
-    float &total_time, int &num_time_steps, int &time_steps_per_frame, int &algorithm) {
+    float &total_time, int &num_time_steps, int &time_steps_per_frame) {
   std::ifstream in(infile);
   float *particle_data, *particle_vels;
 
   in >> num_blocks >> num_threads_per_block >> num_particles >> width >> height
-      >> total_time >> num_threads_per_block >> time_steps_per_frame >> algorithm
+      >> total_time >> num_time_steps >> time_steps_per_frame;
 
   particle_data = new float[3 * num_particles];
   particle_vels = new float[2 * num_particles];
@@ -50,6 +50,19 @@ void load_input_file(char *infile,
 
   delete[] particle_data;
   delete[] particle_vels;
+}
+
+int parse_alg_input(int alg) {
+  if (alg == 1)
+    return SIMPLE;
+  else if (alg == 2)
+    return PXP;
+  else if (alg == 3)
+    return PXP_OPT;
+  else
+    std::cout << "Invalid algorithm given: " << alg << std::endl;
+
+  exit(1);
 }
 
 void run_simulation(
@@ -136,8 +149,9 @@ int main(int argc, char** argv)
   int time_steps_per_frame;
 
   // Set command-line arguments
-  if (argc == 2) {
-    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
+  if (argc == 3) {
+    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
+    algorithm = parse_alg_input(atoi(argv[9]));
   } else if(argc == 4) {
     width = 512;
     height = 512;
@@ -152,12 +166,7 @@ int main(int argc, char** argv)
     num_time_steps = atoi(argv[7]);
     time_steps_per_frame = atoi(argv[8]);
 
-    if (atoi(argv[9]) == 1)
-      algorithm = SIMPLE;
-    else if (atoi(argv[9]) == 2)
-      algorithm = PXP;   
-    else if (atoi(argv[9]) == 3)
-      algorithm = PXP_OPT;
+    algorithm = parse_alg_input(atoi(argv[9]));
 
   } else {
       printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame> <algorithm>]\n");
