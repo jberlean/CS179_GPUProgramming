@@ -189,16 +189,15 @@ float2 get_force_opt2(float3 pos_data, float3 * data_old, int num_particles) {
     dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5); 
 
     force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
-    force.x += x_dist1 * force_magnitude1;
-    force.y += y_dist1 * force_magnitude1;
  
     x_dist2 = pos_data.x - other_data2.x;
     y_dist2 = pos_data.y - other_data2.y;
     dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5);    
 
     force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
-    force.x += x_dist2 * force_magnitude2;
-    force.y += y_dist2 * force_magnitude2;
+
+    force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2;
+    force.y += y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2;
   }
   return force;  
 }
@@ -423,7 +422,7 @@ void pxp_opt_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, flo
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      float2 block_force = get_force_opt1(pos_data, sdata, blockDim.x);
+      float2 block_force = get_force_opt2(pos_data, sdata, blockDim.x);
       force.x += block_force.x;
       force.y += block_force.y;
     }    
