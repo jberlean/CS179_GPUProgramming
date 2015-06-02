@@ -28,6 +28,30 @@ void output_data(std::ofstream &out, float *particle_data, float *particle_vels,
   }
 }
 
+void load_input_file(char *infile,
+    int &num_blocks, int &num_threads_per_block,
+    int &num_particles, float &width, float &height,
+    float &total_time, int &num_time_steps, int &time_steps_per_frame, int &algorithm) {
+  std::ifstream in(infile);
+  float *particle_data, *particle_vels;
+
+  in >> num_blocks >> num_threads_per_block >> num_particles >> width >> height
+      >> total_time >> num_threads_per_block >> time_steps_per_frame >> algorithm
+
+  particle_data = new float[3 * num_particles];
+  particle_vels = new float[2 * num_particles];
+
+  for (int i = 0; i < num_particles; i++) {
+    in >> particle_data[3*i] >> particle_data[3*i + 1] >> particle_data[3*i + 2]
+        >> particle_vels[2*i] >> particle_vels[2*i + 1];
+  }
+
+  init_data(num_particles, particle_data, particle_vels, num_blocks, num_threads_per_block, algorithm);
+
+  delete[] particle_data;
+  delete[] particle_vels;
+}
+
 void run_simulation(
     int num_blocks,
     int num_threads_per_block,
@@ -112,7 +136,9 @@ int main(int argc, char** argv)
   int time_steps_per_frame;
 
   // Set command-line arguments
-  if(argc == 4) {
+  if (argc == 2) {
+    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
+  } else if(argc == 4) {
     width = 512;
     height = 512;
     total_time = 10;
