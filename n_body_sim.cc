@@ -31,7 +31,7 @@ void output_data(std::ofstream &out, float *particle_data, float *particle_vels,
 void load_input_file(char *infile,
     int &num_blocks, int &num_threads_per_block,
     int &num_particles, float &width, float &height,
-    float &total_time, int &num_time_steps, int &time_steps_per_frame) {
+    float &total_time, int &num_time_steps, int &time_steps_per_frame, int algorithm) {
   std::ifstream in(infile);
   float *particle_data, *particle_vels;
 
@@ -150,8 +150,8 @@ int main(int argc, char** argv)
 
   // Set command-line arguments
   if (argc == 3) {
-    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
     algorithm = parse_alg_input(atoi(argv[9]));
+    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
   } else if(argc == 4) {
     width = 512;
     height = 512;
