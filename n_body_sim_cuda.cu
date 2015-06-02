@@ -261,7 +261,7 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
   float2 force = {0, 0};
 
   float3 other_data1, other_data2, other_data3, other_data4;
-  float3 other_data2, other_data3, other_data4, other_data8;
+  float3 other_data5, other_data6, other_data7, other_data8;
 
   float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
   float x_dist3, y_dist3, dist_cubed3, x_dist4, y_dist4, dist_cubed4;
