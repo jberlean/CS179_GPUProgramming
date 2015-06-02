@@ -324,12 +324,12 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
     dist_cubed8 = pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + SOFT_FACTOR, 1.5);    
 
     force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
-               x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4
+               x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4 +
                x_dist5 * force_magnitude5 + x_dist6 * force_magnitude6 + 
                x_dist7 * force_magnitude7 + x_dist8 * force_magnitude8;
 
     force.y += y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
-               y_dist3 * force_magnitude3 + y_dist4 * force_magnitude4
+               y_dist3 * force_magnitude3 + y_dist4 * force_magnitude4 +
                y_dist5 * force_magnitude5 + y_dist6 * force_magnitude6 + 
                y_dist7 * force_magnitude7 + y_dist8 * force_magnitude8;
   }
