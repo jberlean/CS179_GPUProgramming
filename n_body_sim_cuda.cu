@@ -119,14 +119,14 @@ void delete_data() {
 }
 
 __device__
-float2 get_force_lu1(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
-  float2 force = {0, 0};
+float2 get_accel_lu1(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum accel due to every other particle based on mass, position of both particles
+  float2 accel = {0, 0};
 
   float3 other_data1;
   float x_dist1, y_dist1, dist_cubed1;
 
-  float force_magnitude1;
+  float accel_magnitude1;
   float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i++)
   {
@@ -135,22 +135,22 @@ float2 get_force_lu1(float3 pos_data, float3 * data_old, int num_particles) {
     y_dist1 = pos_data.y - other_data1.y;
     dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
-    force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
-    force.x -= x_dist1 * force_magnitude1;
-    force.y -= y_dist1 * force_magnitude1;   
+    accel_magnitude1 = other_data1.z / dist_cubed1; 
+    accel.x -= x_dist1 * accel_magnitude1;
+    accel.y -= y_dist1 * accel_magnitude1;   
   }
-  return force;  
+  return accel;  
 }
 
 __device__
-float2 get_force_lu2(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
-  float2 force = {0, 0};
+float2 get_accel_lu2(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum accel from every other particle based on mass, position of both particles
+  float2 accel = {0, 0};
 
   float3 other_data1, other_data2;
   float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
 
-  float force_magnitude1, force_magnitude2;
+  float accel_magnitude1, accel_magnitude2;
   float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=2)
   {
@@ -165,25 +165,25 @@ float2 get_force_lu2(float3 pos_data, float3 * data_old, int num_particles) {
     dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
     dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + soft_factor, 1.5f); 
 
-    force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
-    force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
+    accel_magnitude1 = other_data1.z / dist_cubed1; 
+    accel_magnitude2 = other_data2.z / dist_cubed2; 
 
-    force.x -= x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2;
-    force.y -= y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2;
+    accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2;
+    accel.y -= y_dist1 * accel_magnitude1 + y_dist2 * accel_magnitude2;
   }
-  return force;  
+  return accel;  
 }
 
 __device__
-float2 get_force_lu4(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
-  float2 force = {0, 0};
+float2 get_accel_lu4(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum accel from every other particle based on mass, position of both particles
+  float2 accel = {0, 0};
 
   float3 other_data1, other_data2, other_data3, other_data4;
   float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
   float x_dist3, y_dist3, dist_cubed3, x_dist4, y_dist4, dist_cubed4;
 
-  float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
+  float accel_magnitude1, accel_magnitude2, accel_magnitude3, accel_magnitude4;
   float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=4)
   {
@@ -206,23 +206,23 @@ float2 get_force_lu4(float3 pos_data, float3 * data_old, int num_particles) {
     dist_cubed3 = pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + soft_factor, 1.5f); 
     dist_cubed4 = pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + soft_factor, 1.5f);    
 
-    force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
-    force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
-    force_magnitude3 = pos_data.z * other_data3.z / dist_cubed3; 
-    force_magnitude4 = pos_data.z * other_data4.z / dist_cubed4; 
+    accel_magnitude1 = other_data1.z / dist_cubed1; 
+    accel_magnitude2 = other_data2.z / dist_cubed2; 
+    accel_magnitude3 = other_data3.z / dist_cubed3; 
+    accel_magnitude4 = other_data4.z / dist_cubed4; 
 
-    force.x -= x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
-               x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4;
-    force.y -= y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
-               y_dist3 * force_magnitude3 + y_dist4 * force_magnitude4;
+    accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2 + 
+               x_dist3 * accel_magnitude3 + x_dist4 * accel_magnitude4;
+    accel.y -= y_dist1 * accel_magnitude1 + y_dist2 * accel_magnitude2 + 
+               y_dist3 * accel_magnitude3 + y_dist4 * accel_magnitude4;
   }
-  return force;  
+  return accel;  
 }
 
 __device__
-float2 get_force_lu8(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
-  float2 force = {0, 0};
+float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum accel from every other particle based on mass, position of both particles
+  float2 accel = {0, 0};
 
   float3 other_data1, other_data2, other_data3, other_data4;
   float3 other_data5, other_data6, other_data7, other_data8;
@@ -232,8 +232,8 @@ float2 get_force_lu8(float3 pos_data, float3 * data_old, int num_particles) {
   float x_dist5, y_dist5, dist_cubed5, x_dist6, y_dist6, dist_cubed6;
   float x_dist7, y_dist7, dist_cubed7, x_dist8, y_dist8, dist_cubed8;
 
-  float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
-  float force_magnitude5, force_magnitude6, force_magnitude7, force_magnitude8;
+  float accel_magnitude1, accel_magnitude2, accel_magnitude3, accel_magnitude4;
+  float accel_magnitude5, accel_magnitude6, accel_magnitude7, accel_magnitude8;
 
   float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=8)
@@ -273,40 +273,40 @@ float2 get_force_lu8(float3 pos_data, float3 * data_old, int num_particles) {
     dist_cubed7 = pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + soft_factor, 1.5f); 
     dist_cubed8 = pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + soft_factor, 1.5f);    
 
-    force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
-    force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
-    force_magnitude3 = pos_data.z * other_data3.z / dist_cubed3; 
-    force_magnitude4 = pos_data.z * other_data4.z / dist_cubed4; 
-    force_magnitude5 = pos_data.z * other_data5.z / dist_cubed5; 
-    force_magnitude6 = pos_data.z * other_data6.z / dist_cubed6; 
-    force_magnitude7 = pos_data.z * other_data7.z / dist_cubed7; 
-    force_magnitude8 = pos_data.z * other_data8.z / dist_cubed8; 
+    accel_magnitude1 = other_data1.z / dist_cubed1; 
+    accel_magnitude2 = other_data2.z / dist_cubed2; 
+    accel_magnitude3 = other_data3.z / dist_cubed3; 
+    accel_magnitude4 = other_data4.z / dist_cubed4; 
+    accel_magnitude5 = other_data5.z / dist_cubed5; 
+    accel_magnitude6 = other_data6.z / dist_cubed6; 
+    accel_magnitude7 = other_data7.z / dist_cubed7; 
+    accel_magnitude8 = other_data8.z / dist_cubed8; 
 
-    force.x -= x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
-               x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4 +
-               x_dist5 * force_magnitude5 + x_dist6 * force_magnitude6 + 
-               x_dist7 * force_magnitude7 + x_dist8 * force_magnitude8;
+    accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2 + 
+               x_dist3 * accel_magnitude3 + x_dist4 * accel_magnitude4 +
+               x_dist5 * accel_magnitude5 + x_dist6 * accel_magnitude6 + 
+               x_dist7 * accel_magnitude7 + x_dist8 * accel_magnitude8;
 
-    force.y -= y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
-               y_dist3 * force_magnitude3 + y_dist4 * force_magnitude4 +
-               y_dist5 * force_magnitude5 + y_dist6 * force_magnitude6 + 
-               y_dist7 * force_magnitude7 + y_dist8 * force_magnitude8;
+    accel.y -= y_dist1 * accel_magnitude1 + y_dist2 * accel_magnitude2 + 
+               y_dist3 * accel_magnitude3 + y_dist4 * accel_magnitude4 +
+               y_dist5 * accel_magnitude5 + y_dist6 * accel_magnitude6 + 
+               y_dist7 * accel_magnitude7 + y_dist8 * accel_magnitude8;
   }
-  return force;  
+  return accel;  
 }
 
 
 __device__
-float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
+float2 get_accel(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum accel from every other particle based on mass, position of both particles
 #if UNROLLING == 1
-  return get_force_lu1(pos_data, data_old, num_particles);
+  return get_accel_lu1(pos_data, data_old, num_particles);
 #elif UNROLLING == 2
-  return get_force_lu2(pos_data, data_old, num_particles);
+  return get_accel_lu2(pos_data, data_old, num_particles);
 #elif UNROLLING == 4
-  return get_force_lu4(pos_data, data_old, num_particles);
+  return get_accel_lu4(pos_data, data_old, num_particles);
 #elif UNROLLING == 8
-  return get_force_lu8(pos_data, data_old, num_particles);
+  return get_accel_lu8(pos_data, data_old, num_particles);
 #else
   printf("Incorrect unrolling factor given %d", UNROLLING);
 #endif
@@ -320,10 +320,10 @@ void simple_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, floa
 
   while (i < num_particles)
   {
-    float2 force = get_force(data_old[i], data_old, num_particles);
+    float2 accel = get_accel(data_old[i], data_old, num_particles);
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z;
-    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
+    vels_new[i].x = vels_old[i].x + accel.x * dt;
+    vels_new[i].y = vels_old[i].y + accel.y * dt;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
     data_new[i].y = data_old[i].y + vels_new[i].y * dt;
@@ -341,9 +341,9 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
   
   while (i < num_particles)
   {
-    float2 force;
-    force.x = 0;
-    force.y = 0; 
+    float2 accel;
+    accel.x = 0;
+    accel.y = 0; 
 
     float3 pos_data = data_old[i];
     // NOTE: num_particles is a multiple of num_threads_per_block.
@@ -352,16 +352,16 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      float2 block_force = get_force(pos_data, sdata, blockDim.x);
-      force.x += block_force.x;
-      force.y += block_force.y;
+      float2 block_accel = get_accel(pos_data, sdata, blockDim.x);
+      accel.x += block_accel.x;
+      accel.y += block_accel.y;
     }    
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
-    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
+    vels_new[i].x = vels_old[i].x + accel.x * dt;
+    vels_new[i].y = vels_old[i].y + accel.y * dt;
     
-    data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
-    data_new[i].y = data_old[i].y + vels_new[i].y * dt;
+    data_new[i].x = pos_data.x + vels_new[i].x * dt; 
+    data_new[i].y = pos_data.y + vels_new[i].y * dt;
 
     i += blockDim.x * gridDim.x;
   }
@@ -376,9 +376,9 @@ void pxp_opt_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, flo
   
   while (i < num_particles)
   {
-    float2 force;
-    force.x = 0;
-    force.y = 0; 
+    float2 accel;
+    accel.x = 0;
+    accel.y = 0; 
 
     float3 pos_data = data_old[i];
     // NOTE: num_particles is a multiple of num_threads_per_block.
@@ -387,16 +387,16 @@ void pxp_opt_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, flo
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      float2 block_force = get_force(pos_data, sdata, blockDim.x);
-      force.x += block_force.x;
-      force.y += block_force.y;
+      float2 block_accel = get_accel(pos_data, sdata, blockDim.x);
+      accel.x += block_accel.x;
+      accel.y += block_accel.y;
     }    
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
-    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
+    vels_new[i].x = vels_old[i].x + accel.x * dt;
+    vels_new[i].y = vels_old[i].y + accel.y * dt;
     
-    data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
-    data_new[i].y = data_old[i].y + vels_new[i].y * dt;
+    data_new[i].x = pos_data.x + vels_new[i].x * dt; 
+    data_new[i].y = pos_data.y + vels_new[i].y * dt;
 
     i += blockDim.x * gridDim.x;
   }
