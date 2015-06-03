@@ -506,14 +506,14 @@ void call_interact_kernel(float dt) {
   }
   else if (algorithm == PXP)
   {
-    pxp_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
+    pxp_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float) * 3>>>
                                                         (particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
   }
   else if (algorithm == PXP_OPT)
   {
-    pxp_opt_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
+    pxp_opt_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float) * 3>>>
                                                         (particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
