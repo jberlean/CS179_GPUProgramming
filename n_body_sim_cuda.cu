@@ -226,7 +226,7 @@ float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
   float accel_magnitude1, accel_magnitude2, accel_magnitude3, accel_magnitude4;
   float accel_magnitude5, accel_magnitude6, accel_magnitude7, accel_magnitude8;
 
-  float soft_factor = SOFT_FACTOR;
+  //float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=8)
   {
     other_data1 = data_old[i];
@@ -255,14 +255,14 @@ float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
     x_dist8 = pos_data.x - other_data8.x;
     y_dist8 = pos_data.y - other_data8.y;
 
-    accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f);
-    accel_magnitude2 = other_data2.z / pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + soft_factor, 1.5f);
-    accel_magnitude3 = other_data3.z / pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + soft_factor, 1.5f);
-    accel_magnitude4 = other_data4.z / pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + soft_factor, 1.5f);
-    accel_magnitude5 = other_data5.z / pow(x_dist5 * x_dist5 + y_dist5 * y_dist5 + soft_factor, 1.5f);
-    accel_magnitude6 = other_data6.z / pow(x_dist6 * x_dist6 + y_dist6 * y_dist6 + soft_factor, 1.5f);
-    accel_magnitude7 = other_data7.z / pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + soft_factor, 1.5f);
-    accel_magnitude8 = other_data8.z / pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + soft_factor, 1.5f);
+    accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5f);
+    accel_magnitude2 = other_data2.z / pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5f);
+    accel_magnitude3 = other_data3.z / pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, 1.5f);
+    accel_magnitude4 = other_data4.z / pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, 1.5f);
+    accel_magnitude5 = other_data5.z / pow(x_dist5 * x_dist5 + y_dist5 * y_dist5 + SOFT_FACTOR, 1.5f);
+    accel_magnitude6 = other_data6.z / pow(x_dist6 * x_dist6 + y_dist6 * y_dist6 + SOFT_FACTOR, 1.5f);
+    accel_magnitude7 = other_data7.z / pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + SOFT_FACTOR, 1.5f);
+    accel_magnitude8 = other_data8.z / pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + SOFT_FACTOR, 1.5f);
 
     accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2 + 
                x_dist3 * accel_magnitude3 + x_dist4 * accel_magnitude4 +

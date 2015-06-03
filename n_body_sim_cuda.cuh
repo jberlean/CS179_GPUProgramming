@@ -8,7 +8,7 @@
 
 #define UNROLLING 4
 
-#define SOFT_FACTOR 10.0
+#define SOFT_FACTOR 10.0f
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
                float max_vel, int h_num_blocks, int h_num_threads_per_block, int algorithm);
