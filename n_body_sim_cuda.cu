@@ -135,14 +135,11 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
     other_data = data_old[i];
     x_dist = pos_data.x - other_data.x;
     y_dist = pos_data.y - other_data.y;
-    dist_squared = x_dist * x_dist + y_dist * y_dist; 
+    dist_squared = x_dist * x_dist + y_dist * y_dist + soft_factor;
 
-    if (dist_squared > 0)
-    {
-      force_magnitude = pos_data.z * other_data.z / (dist_squared + soft_factor);
-      force.x += x_dist * force_magnitude / sqrt(dist_squared);
-      force.y += y_dist * force_magnitude / sqrt(dist_squared);
-    }
+    force_magnitude = pos_data.z * other_data.z / dist_squared;
+    force.x += x_dist * force_magnitude / sqrt(dist_squared);
+    force.y += y_dist * force_magnitude / sqrt(dist_squared);
   }
   return force;  
 }
