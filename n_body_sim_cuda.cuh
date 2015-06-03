@@ -6,7 +6,7 @@
 #define PXP 2
 #define PXP_OPT 3
 
-#define UNROLLING 1
+#define UNROLLING 4
 
 #define SOFT_FACTOR 10.0
 
