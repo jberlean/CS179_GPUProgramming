@@ -138,8 +138,8 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
     dist_squared = x_dist * x_dist + y_dist * y_dist + soft_factor;
 
     force_magnitude = pos_data.z * other_data.z / dist_squared;
-    force.x += x_dist * force_magnitude / sqrt(dist_squared);
-    force.y += y_dist * force_magnitude / sqrt(dist_squared);
+    force.x -= x_dist * force_magnitude / sqrt(dist_squared);
+    force.y -= y_dist * force_magnitude / sqrt(dist_squared);
   }
   return force;  
 }
