@@ -124,7 +124,7 @@ float2 get_accel_lu1(float3 pos_data, float3 * data_old, int num_particles) {
   float2 accel = {0, 0};
 
   float3 other_data1;
-  float x_dist1, y_dist1, dist_cubed1;
+  float x_dist1, y_dist1;
 
   float accel_magnitude1;
   float soft_factor = SOFT_FACTOR;
@@ -147,7 +147,7 @@ float2 get_accel_lu2(float3 pos_data, float3 * data_old, int num_particles) {
   float2 accel = {0, 0};
 
   float3 other_data1, other_data2;
-  float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
+  float x_dist1, y_dist1, x_dist2, y_dist2;
 
   float accel_magnitude1, accel_magnitude2;
   float soft_factor = SOFT_FACTOR;
@@ -157,8 +157,8 @@ float2 get_accel_lu2(float3 pos_data, float3 * data_old, int num_particles) {
     other_data2 = data_old[i + 1];
 
     x_dist1 = pos_data.x - other_data1.x;
-    y_dist1 = pos_data.y - other_data1.y;
     x_dist2 = pos_data.x - other_data2.x;
+    y_dist1 = pos_data.y - other_data1.y;
     y_dist2 = pos_data.y - other_data2.y;
 
     accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f);
@@ -176,8 +176,8 @@ float2 get_accel_lu4(float3 pos_data, float3 * data_old, int num_particles) {
   float2 accel = {0, 0};
 
   float3 other_data1, other_data2, other_data3, other_data4;
-  float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
-  float x_dist3, y_dist3, dist_cubed3, x_dist4, y_dist4, dist_cubed4;
+  float x_dist1, y_dist1, x_dist2, y_dist2;
+  float x_dist3, y_dist3, x_dist4, y_dist4;
 
   float accel_magnitude1, accel_magnitude2, accel_magnitude3, accel_magnitude4;
   float soft_factor = SOFT_FACTOR;
@@ -189,12 +189,12 @@ float2 get_accel_lu4(float3 pos_data, float3 * data_old, int num_particles) {
     other_data4 = data_old[i + 3];
 
     x_dist1 = pos_data.x - other_data1.x;
-    y_dist1 = pos_data.y - other_data1.y;
     x_dist2 = pos_data.x - other_data2.x;
-    y_dist2 = pos_data.y - other_data2.y;
     x_dist3 = pos_data.x - other_data3.x;
-    y_dist3 = pos_data.y - other_data3.y;
     x_dist4 = pos_data.x - other_data4.x;
+    y_dist1 = pos_data.y - other_data1.y;
+    y_dist2 = pos_data.y - other_data2.y;
+    y_dist3 = pos_data.y - other_data3.y;
     y_dist4 = pos_data.y - other_data4.y;
 
     accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f);
@@ -218,10 +218,10 @@ float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
   float3 other_data1, other_data2, other_data3, other_data4;
   float3 other_data5, other_data6, other_data7, other_data8;
 
-  float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
-  float x_dist3, y_dist3, dist_cubed3, x_dist4, y_dist4, dist_cubed4;
-  float x_dist5, y_dist5, dist_cubed5, x_dist6, y_dist6, dist_cubed6;
-  float x_dist7, y_dist7, dist_cubed7, x_dist8, y_dist8, dist_cubed8;
+  float x_dist1, y_dist1, x_dist2, y_dist2;
+  float x_dist3, y_dist3, x_dist4, y_dist4;
+  float x_dist5, y_dist5, x_dist6, y_dist6;
+  float x_dist7, y_dist7, x_dist8, y_dist8;
 
   float accel_magnitude1, accel_magnitude2, accel_magnitude3, accel_magnitude4;
   float accel_magnitude5, accel_magnitude6, accel_magnitude7, accel_magnitude8;
@@ -239,20 +239,20 @@ float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
     other_data8 = data_old[i + 7];
 
     x_dist1 = pos_data.x - other_data1.x;
-    y_dist1 = pos_data.y - other_data1.y;
     x_dist2 = pos_data.x - other_data2.x;
-    y_dist2 = pos_data.y - other_data2.y;
     x_dist3 = pos_data.x - other_data3.x;
-    y_dist3 = pos_data.y - other_data3.y;
     x_dist4 = pos_data.x - other_data4.x;
-    y_dist4 = pos_data.y - other_data4.y;
     x_dist5 = pos_data.x - other_data5.x;
-    y_dist5 = pos_data.y - other_data5.y;
     x_dist6 = pos_data.x - other_data6.x;
-    y_dist6 = pos_data.y - other_data6.y;
     x_dist7 = pos_data.x - other_data7.x;
-    y_dist7 = pos_data.y - other_data7.y;
     x_dist8 = pos_data.x - other_data8.x;
+    y_dist1 = pos_data.y - other_data1.y;
+    y_dist2 = pos_data.y - other_data2.y;
+    y_dist3 = pos_data.y - other_data3.y;
+    y_dist4 = pos_data.y - other_data4.y;
+    y_dist5 = pos_data.y - other_data5.y;
+    y_dist6 = pos_data.y - other_data6.y;
+    y_dist7 = pos_data.y - other_data7.y;
     y_dist8 = pos_data.y - other_data8.y;
 
     accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f);
