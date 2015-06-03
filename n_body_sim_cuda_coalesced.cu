@@ -435,8 +435,8 @@ void pxp_kernel(float * vels_old, float * vels_new, float * data_old, float * da
     {
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
-      sdata[tid + num_particles] = data_old[num_tile * blockDim.x + tid + num_particles];
-      sdata[tid + 2 * num_particles] = data_old[num_tile * blockDim.x + tid + 2 * num_particles];
+      sdata[tid + blockDim.x] = data_old[num_tile * blockDim.x + tid + num_particles];
+      sdata[tid + 2 * blockDim.x] = data_old[num_tile * blockDim.x + tid + 2 * num_particles];
  
       __syncthreads();
       float2 block_force = get_force(pos_data, sdata, blockDim.x);
@@ -477,8 +477,8 @@ void pxp_opt_kernel(float * vels_old, float * vels_new, float * data_old, float 
     {
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
-      sdata[tid + num_particles] = data_old[num_tile * blockDim.x + tid + num_particles];
-      sdata[tid + 2 * num_particles] = data_old[num_tile * blockDim.x + tid + 2 * num_particles];
+      sdata[tid + blockDim.x] = data_old[num_tile * blockDim.x + tid + num_particles];
+      sdata[tid + 2 * blockDim.x] = data_old[num_tile * blockDim.x + tid + 2 * num_particles];
  
       __syncthreads();
       float2 block_force = get_force_opt2(pos_data, sdata, blockDim.x);
