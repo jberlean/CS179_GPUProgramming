@@ -9,14 +9,13 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, float v_max, int algorithm) {
+void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, int algorithm) {
   out << num_particles << " "
       << width << " "
       << height << " "
       << total_time << " "
       << num_time_steps << " "
       << time_steps_per_frame << " " 
-      << v_max << " "
       << algorithm << std::endl;
 
 }
@@ -24,7 +23,7 @@ void output_data_header(std::ofstream &out, int num_particles, float width, floa
 void output_data(std::ofstream &out, float *particle_data, float *particle_vels, int frame_num, int num_particles, float width, float height) {
   out << frame_num << std::endl;
   for (int i = 0; i < num_particles; i++) {
-    out << particle_data[i*3] << " " << particle_data[i*3 + 1] << " " << particle_data[i*3 + 2] << std::endl;
+    out << particle_data[i*3] << " " << particle_data[i*3 + 1] << " " << particle_data[i*3 + 2] << " " << particle_vels[i*2] << " " << particle_vels[i*2 + 1] << std::endl;
   }
 }
 
@@ -89,15 +88,11 @@ void run_simulation(
   dt = total_time / num_time_steps;
 
   // Allocate data structures on host
-  particle_data = new float[num_particles * 3 * sizeof(float)];
-  particle_vels = new float[num_particles * 2 * sizeof(float)];
-
-  // Initialze data structures
-  float v_max = std::min(width, height) / 1000.0;
-  init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block, algorithm);
+  particle_data = new float[num_particles * 3];
+  particle_vels = new float[num_particles * 2];
 
   // Output header for data file
-  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, v_max, algorithm);
+  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
 
   // Run <time_steps> iterations of simulation
   int status_counter = 0;
@@ -150,38 +145,46 @@ int main(int argc, char** argv)
 
   // Set command-line arguments
   if (argc == 3) {
-    algorithm = parse_alg_input(atoi(argv[9]));
+    algorithm = parse_alg_input(atoi(argv[2]));
     load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
-  } else if(argc == 4) {
-    width = 512;
-    height = 512;
-    total_time = 10;
-    num_time_steps = 1000;
-    time_steps_per_frame = 10;
-    algorithm = SIMPLE;
-  } else if (argc == 10) {
-    width = atof(argv[4]);
-    height = atof(argv[5]);
-    total_time = atof(argv[6]);
-    num_time_steps = atoi(argv[7]);
-    time_steps_per_frame = atoi(argv[8]);
+  } else if(argc == 4 || argc == 10) {
+      if (argc == 4) {
+        width = 512;
+        height = 512;
+        total_time = 10;
+        num_time_steps = 1000;
+        time_steps_per_frame = 10;
+        algorithm = SIMPLE;
+      } else if (argc == 10) {
+        num_blocks = atoi(argv[1]);
+        num_threads_per_block = atoi(argv[2]);
+        num_particles = atoi(argv[3]);
+        width = atof(argv[4]);
+        height = atof(argv[5]);
+        total_time = atof(argv[6]);
+        num_time_steps = atoi(argv[7]);
+        time_steps_per_frame = atoi(argv[8]);
+        algorithm = parse_alg_input(atoi(argv[9]));
+      }
+      num_blocks = atoi(argv[1]);
+      num_threads_per_block = atoi(argv[2]);
+      num_particles = atoi(argv[3]);
 
-    algorithm = parse_alg_input(atoi(argv[9]));
-
+      float v_max = std::min(width, height) / 1000.0;
+      init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block, algorithm);
   } else {
       printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame> <algorithm>]\n");
       exit(1);
   }
-  num_blocks = atoi(argv[1]);
-  num_threads_per_block = atoi(argv[2]);
-  num_particles = atoi(argv[3]);
-
+    
   // Make sure output directory exists
   std::ifstream test("output");
   if ((bool)test == false) {
     printf("Cannot find output directory, please make it (\"mkdir output\")\n");
     exit(1);
   }
+
+  std::cout << "Initialization complete. Beginning simulation.\n";
 
   // Run simulation with given parameters
   run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, 
