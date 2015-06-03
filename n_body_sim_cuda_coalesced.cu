@@ -160,6 +160,7 @@ float2 get_force_opt1(float3 pos_data, float * data_old, int num_particles) {
   float x_dist1, y_dist1, dist_cubed1;
 
   float force_magnitude1;
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=1)
   {
     other_data1.x = data_old[i];
@@ -186,6 +187,7 @@ float2 get_force_opt2(float3 pos_data, float * data_old, int num_particles) {
   float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
 
   float force_magnitude1, force_magnitude2;
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=2)
   {
     other_data1.x = data_old[i];
@@ -224,6 +226,7 @@ float2 get_force_opt4(float3 pos_data, float * data_old, int num_particles) {
   float x_dist3, y_dist3, dist_cubed3, x_dist4, y_dist4, dist_cubed4;
 
   float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=2)
   {
     other_data1.x = data_old[i];
@@ -289,6 +292,7 @@ float2 get_force_opt8(float3 pos_data, float * data_old, int num_particles) {
   float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
   float force_magnitude5, force_magnitude6, force_magnitude7, force_magnitude8;
 
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=2)
   {
     other_data1.x = data_old[i];
