@@ -144,8 +144,8 @@ float2 get_force(float3 pos_data, float * data_old, int num_particles) {
     if (dist_squared > 0)
     {
       force_magnitude = pos_data.z * other_data.z / (dist_squared + soft_factor);
-      force.x += x_dist * force_magnitude / sqrt(dist_squared);
-      force.y += y_dist * force_magnitude / sqrt(dist_squared);
+      force.x -= x_dist * force_magnitude / sqrt(dist_squared);
+      force.y -= y_dist * force_magnitude / sqrt(dist_squared);
     }
   }
   return force;  
@@ -171,8 +171,8 @@ float2 get_force_opt1(float3 pos_data, float * data_old, int num_particles) {
     dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
     force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
-    force.x += x_dist1 * force_magnitude1;
-    force.y += y_dist1 * force_magnitude1;   
+    force.x -= x_dist1 * force_magnitude1;
+    force.y -= y_dist1 * force_magnitude1;   
   }
   return force;  
 }
@@ -208,8 +208,8 @@ float2 get_force_opt2(float3 pos_data, float * data_old, int num_particles) {
 
     force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
 
-    force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2;
-    force.y += y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2;
+    force.x -= x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2;
+    force.y -= y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2;
   }
   return force;  
 }
@@ -265,9 +265,9 @@ float2 get_force_opt4(float3 pos_data, float * data_old, int num_particles) {
     dist_cubed4 = pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + soft_factor, 1.5f);    
 
     force_magnitude4 = pos_data.z * other_data4.z / dist_cubed4; 
-    force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
+    force.x -= x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
                x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4;
-    force.y += y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
+    force.y -= y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
                y_dist3 * force_magnitude3 + y_dist4 * force_magnitude4;
   }
   return force;  
@@ -371,12 +371,12 @@ float2 get_force_opt8(float3 pos_data, float * data_old, int num_particles) {
 
     force_magnitude8 = pos_data.z * other_data8.z / dist_cubed8; 
 
-    force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
+    force.x -= x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
                x_dist3 * force_magnitude3 + x_dist4 * force_magnitude4 +
                x_dist5 * force_magnitude5 + x_dist6 * force_magnitude6 + 
                x_dist7 * force_magnitude7 + x_dist8 * force_magnitude8;
 
-    force.y += y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
+    force.y -= y_dist1 * force_magnitude1 + y_dist2 * force_magnitude2 + 
                y_dist3 * force_magnitude3 + y_dist4 * force_magnitude4 +
                y_dist5 * force_magnitude5 + y_dist6 * force_magnitude6 + 
                y_dist7 * force_magnitude7 + y_dist8 * force_magnitude8;
