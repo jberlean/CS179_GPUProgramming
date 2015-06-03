@@ -119,22 +119,6 @@ void delete_data() {
 }
 
 __device__
-float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
-#if UNROLLING == 1
-  return get_force_lu1(pos_data, data_old, num_particles);
-#elif UNROLLING == 2
-  return get_force_lu2(pos_data, data_old, num_particles);
-#elif UNROLLING == 4
-  return get_force_lu4(pos_data, data_old, num_particles);
-#elif UNROLLING == 8
-  return get_force_lu8(pos_data, data_old, num_particles);
-#else
-  printf("Incorrect unrolling factor given %d", UNROLLING);
-#endif
-}
-
-__device__
 float2 get_force_lu1(float3 pos_data, float3 * data_old, int num_particles) {
   // sum force from every other particle based on mass, position of both particles
   float2 force = {0, 0};
@@ -328,6 +312,24 @@ float2 get_force_lu8(float3 pos_data, float3 * data_old, int num_particles) {
   }
   return force;  
 }
+
+
+__device__
+float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum force from every other particle based on mass, position of both particles
+#if UNROLLING == 1
+  return get_force_lu1(pos_data, data_old, num_particles);
+#elif UNROLLING == 2
+  return get_force_lu2(pos_data, data_old, num_particles);
+#elif UNROLLING == 4
+  return get_force_lu4(pos_data, data_old, num_particles);
+#elif UNROLLING == 8
+  return get_force_lu8(pos_data, data_old, num_particles);
+#else
+  printf("Incorrect unrolling factor given %d", UNROLLING);
+#endif
+}
+
 
 __global__
 void simple_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
