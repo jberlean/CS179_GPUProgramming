@@ -45,7 +45,7 @@ n_body_sim: n_body_sim.cc n_body_sim_cuda.o
 n_body_sim_coalesced: n_body_sim_coalesced.cc n_body_sim_cuda_coalesced.o
 	$(CC) $< -o $@ n_body_sim_cuda_coalesced.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
 
-n_body_sim_cuda.o: n_body_sim_cuda.cu
+n_body_sim_cuda.o: n_body_sim_cuda.cu n_body_sim_cuda.cuh
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 n_body_sim_cuda_coalesced.o: n_body_sim_cuda_coalesced.cu
