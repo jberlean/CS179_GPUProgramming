@@ -156,12 +156,13 @@ float2 get_force_opt1(float3 pos_data, float3 * data_old, int num_particles) {
   float x_dist1, y_dist1, dist_cubed1;
 
   float force_magnitude1;
+  float soft_factor;
   for (int i = 0; i < num_particles; i+=1)
   {
     other_data1 = data_old[i];
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
-    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5); 
+    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
     force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
     force.x += x_dist1 * force_magnitude1;
@@ -179,6 +180,7 @@ float2 get_force_opt2(float3 pos_data, float3 * data_old, int num_particles) {
   float x_dist1, y_dist1, dist_cubed1, x_dist2, y_dist2, dist_cubed2;
 
   float force_magnitude1, force_magnitude2;
+  float soft_factor;
   for (int i = 0; i < num_particles; i+=2)
   {
     other_data1 = data_old[i];
@@ -186,13 +188,13 @@ float2 get_force_opt2(float3 pos_data, float3 * data_old, int num_particles) {
 
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
-    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5); 
+    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
     force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
  
     x_dist2 = pos_data.x - other_data2.x;
     y_dist2 = pos_data.y - other_data2.y;
-    dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5);    
+    dist_cubed2 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
     force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
 
@@ -212,6 +214,7 @@ float2 get_force_opt4(float3 pos_data, float3 * data_old, int num_particles) {
   float x_dist3, y_dist3, dist_cubed3, x_dist4, y_dist4, dist_cubed4;
 
   float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=2)
   {
     other_data1 = data_old[i];    
@@ -221,25 +224,25 @@ float2 get_force_opt4(float3 pos_data, float3 * data_old, int num_particles) {
 
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
-    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5); 
+    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
     force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
  
     x_dist2 = pos_data.x - other_data2.x;
     y_dist2 = pos_data.y - other_data2.y;
-    dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5);    
+    dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + soft_factor, 1.5f);    
 
     force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
 
     x_dist3 = pos_data.x - other_data3.x;
     y_dist3 = pos_data.y - other_data3.y;
-    dist_cubed3 = pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, 1.5); 
+    dist_cubed3 = pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + soft_factor, 1.5f); 
  
     force_magnitude3 = pos_data.z * other_data3.z / dist_cubed3; 
 
     x_dist4 = pos_data.x - other_data4.x;
     y_dist4 = pos_data.y - other_data4.y;
-    dist_cubed4 = pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, 1.5);    
+    dist_cubed4 = pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + soft_factor, 1.5f);    
 
     force_magnitude4 = pos_data.z * other_data4.z / dist_cubed4; 
     force.x += x_dist1 * force_magnitude1 + x_dist2 * force_magnitude2 + 
@@ -266,6 +269,7 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
   float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
   float force_magnitude5, force_magnitude6, force_magnitude7, force_magnitude8;
 
+  float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i+=2)
   {
     other_data1 = data_old[i];
@@ -279,49 +283,49 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
 
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
-    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5); 
+    dist_cubed1 = pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + soft_factor, 1.5f); 
 
     force_magnitude1 = pos_data.z * other_data1.z / dist_cubed1; 
  
     x_dist2 = pos_data.x - other_data2.x;
     y_dist2 = pos_data.y - other_data2.y;
-    dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5);    
+    dist_cubed2 = pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + soft_factor, 1.5f);    
 
     force_magnitude2 = pos_data.z * other_data2.z / dist_cubed2; 
 
     x_dist3 = pos_data.x - other_data3.x;
     y_dist3 = pos_data.y - other_data3.y;
-    dist_cubed3 = pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, 1.5); 
+    dist_cubed3 = pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + soft_factor, 1.5f); 
  
     force_magnitude3 = pos_data.z * other_data3.z / dist_cubed3; 
 
     x_dist4 = pos_data.x - other_data4.x;
     y_dist4 = pos_data.y - other_data4.y;
-    dist_cubed4 = pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, 1.5);    
+    dist_cubed4 = pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + soft_factor, 1.5f);    
 
     force_magnitude4 = pos_data.z * other_data4.z / dist_cubed4; 
 
     x_dist5 = pos_data.x - other_data5.x;
     y_dist5 = pos_data.y - other_data5.y;
-    dist_cubed5 = pow(x_dist5 * x_dist5 + y_dist5 * y_dist5 + SOFT_FACTOR, 1.5); 
+    dist_cubed5 = pow(x_dist5 * x_dist5 + y_dist5 * y_dist5 + soft_factor, 1.5f); 
 
     force_magnitude5 = pos_data.z * other_data5.z / dist_cubed5; 
  
     x_dist6 = pos_data.x - other_data6.x;
     y_dist6 = pos_data.y - other_data6.y;
-    dist_cubed6 = pow(x_dist6 * x_dist6 + y_dist6 * y_dist6 + SOFT_FACTOR, 1.5);    
+    dist_cubed6 = pow(x_dist6 * x_dist6 + y_dist6 * y_dist6 + soft_factor, 1.5f);    
 
     force_magnitude6 = pos_data.z * other_data6.z / dist_cubed6; 
 
     x_dist7 = pos_data.x - other_data7.x;
     y_dist7 = pos_data.y - other_data7.y;
-    dist_cubed7 = pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + SOFT_FACTOR, 1.5); 
+    dist_cubed7 = pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + soft_factor, 1.5f); 
  
     force_magnitude7 = pos_data.z * other_data7.z / dist_cubed7; 
 
     x_dist8 = pos_data.x - other_data8.x;
     y_dist8 = pos_data.y - other_data8.y;
-    dist_cubed8 = pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + SOFT_FACTOR, 1.5);    
+    dist_cubed8 = pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + soft_factor, 1.5f);    
 
     force_magnitude8 = pos_data.z * other_data8.z / dist_cubed8; 
 
