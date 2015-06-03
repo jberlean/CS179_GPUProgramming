@@ -388,10 +388,15 @@ __global__
 void simple_kernel(float * vels_old, float * vels_new, float * data_old, float * data_new, float dt, int num_particles) {
   // each thread handles a particle
   int i = blockIdx.x * blockDim.x + threadIdx.x;
-
+  
   while (i < num_particles)
   {
-    float2 force = get_force(data_old[i], data_old, num_particles);
+    float3 pos_data;
+    pos_data.x = data_old[i];
+    pos_data.y = data_old[i + num_particles];
+    pos_data.z = data_old[i + 2 * num_particles];
+    
+    float2 force = get_force(pos_data, data_old, num_particles);
     
     vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles];
     vels_new[i + num_particles] = vels_old[i + num_particles] + force.y * dt / data_old[i + 2 * num_particles];
@@ -484,6 +489,7 @@ void pxp_opt_kernel(float * vels_old, float * vels_new, float * data_old, float 
     data_new[i + num_particles] = data_old[i + num_particles] + vels_new[i + num_particles] * dt;
 
     i += blockDim.x * gridDim.x;
+  }
 }
  
 void call_interact_kernel(float dt) {
