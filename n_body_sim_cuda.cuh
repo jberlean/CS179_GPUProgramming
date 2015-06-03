@@ -6,6 +6,8 @@
 #define PXP 2
 #define PXP_OPT 3
 
+#define UNROLLING 1
+
 #define SOFT_FACTOR 10.0
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
