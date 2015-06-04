@@ -188,8 +188,8 @@ float2 get_accel(float3 pos_data, float * data_old, int num_particles) {
     accel_mag3 = other_data3.z * pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, -1.5f);
     accel_mag4 = other_data4.z * pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, -1.5f);
 
-    accel.x -= fma(x_dist1, accel_mag1, fma(x_dist2, accel_mag2, fma(x_dist3, accel_mag3, x_dist4 * accel_mag4);
-    accel.y -= fma(y_dist1, accel_mag1, fma(y_dist2, accel_mag2, fma(y_dist3, accel_mag3, y_dist4 * accel_mag4);
+    accel.x -= fma(x_dist1, accel_mag1, fma(x_dist2, accel_mag2, fma(x_dist3, accel_mag3, x_dist4 * accel_mag4)));
+    accel.y -= fma(y_dist1, accel_mag1, fma(y_dist2, accel_mag2, fma(y_dist3, accel_mag3, y_dist4 * accel_mag4)));
   }
   return accel;  
 }
