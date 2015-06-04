@@ -51,14 +51,14 @@ void init_data(int h_num_particles, float box_width, float box_height, float min
   num_blocks = h_num_blocks;
   num_threads_per_block = h_num_threads_per_block;
 
-  init_data_uncoalesced(h_num_particles, box_width, box_height, min_vel, max_vel, h_num_blocks, h_num_threads_per_block, particle_data, particle_vels);
+  init_data_uncoalesced(num_particles, box_width, box_height, min_vel, max_vel, num_blocks, num_threads_per_block, particle_data, particle_vels);
 }
 void init_data(int h_num_particles, int h_num_blocks, int h_num_threads_per_block, float *h_particle_data, float *h_particle_vels) {
   num_particles = h_num_particles;
   num_blocks = h_num_blocks;
   num_threads_per_block = h_num_threads_per_block;
   
-  init_data_uncoalesced(h_num_particles, h_particle_data, h_particle_vels, particle_data, particle_vels);
+  init_data_uncoalesced(num_particles, h_particle_data, h_particle_vels, particle_data, particle_vels);
 }
 
 void delete_data() {
