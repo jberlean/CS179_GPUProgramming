@@ -192,13 +192,13 @@ void simulate_time_step(float dt) {
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   // copy GPU data into particle_data, particle_vels array
-  // TODO: change format 
   float *temp_particle_data, *temp_particle_vels;
   temp_particle_data = new float[num_particles * 3];
   temp_particle_vels = new float[num_particles * 2];
   gpuErrChk(cudaMemcpy(temp_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
   gpuErrChk(cudaMemcpy(temp_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 
+/*  printf("Reformatting data...\n");
   for (int i = 0; i < num_particles; i++) {
     h_particle_data[3 * i] = temp_particle_data[i];
     h_particle_data[3 * i + 1] = temp_particle_data[i + num_particles];
@@ -206,6 +206,9 @@ void get_particle_data(float * h_particle_data, float * h_particle_vels) {
     h_particle_vels[2 * i] = temp_particle_vels[i];
     h_particle_vels[2 * i + 1] = temp_particle_vels[i + num_particles];
   }
+  printf("Done!\n");*/
+  delete[] temp_particle_data;
+  delete[] temp_particle_vels;
 }
 
 

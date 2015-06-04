@@ -35,7 +35,7 @@ else
 endif
 
 
-TARGETS = sim_cpu sim_simple sim_pxp sim_pxp_opt
+TARGETS = sim_cpu sim_simple sim_pxp sim_pxp_opt sim_simple_coalesced
 
 all: $(TARGETS)
 
