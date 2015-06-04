@@ -45,7 +45,7 @@ void load_input_file(char *infile,
         >> particle_vels[2*i] >> particle_vels[2*i + 1];
   }
 
-  init_data(num_particles, particle_data, particle_vels, num_blocks, num_threads_per_block);
+  init_data(num_particles, num_blocks, num_threads_per_block, particle_data, particle_vels);
 
   delete[] particle_data;
   delete[] particle_vels;
