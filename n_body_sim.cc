@@ -84,8 +84,8 @@ void run_simulation(
   // Run <time_steps> iterations of simulation
   long status_counter = 0;
   for (int step = 0; step < num_time_steps; step++) {
-    // Run kernel
-    call_interact_kernel(dt);
+    // Update the particle data after <dt> time
+    simulate_time_step(dt);
 
     status_counter += num_particles*num_particles;
     if (status_counter > 500000000) {

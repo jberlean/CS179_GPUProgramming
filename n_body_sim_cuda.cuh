@@ -17,7 +17,7 @@ void init_data(int h_num_particles, float *h_particle_data, float *h_particle_ve
 
 void delete_data();
 
-void call_interact_kernel(float dt);
+void simulate_time_step(float dt);
 
 void get_particle_data(float* h_particle_data, float* h_particle_vels);
 

@@ -51,7 +51,7 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
   }
 }
 
-void alloc_particle_info() {
+void alloc_data() {
   // instantiate particle_vels, particle_data on GPU
   gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float2) * num_particles));
   gpuErrChk(cudaMalloc((void **) &particle_vels[1], sizeof(float2) * num_particles));
@@ -68,7 +68,7 @@ void init_data(int h_num_particles, float box_width, float box_height, float min
   num_threads_per_block = h_num_threads_per_block;
 
   // instantiate particle_vels, particle_data on GPU
-  alloc_particle_info();
+  alloc_data();
    
   // set initial values for particle_vels, particle_data on GPU
   float * random;
@@ -89,7 +89,7 @@ void init_data(int h_num_particles, float *h_particle_data, float *h_particle_ve
   num_blocks = h_num_blocks;
   num_threads_per_block = h_num_threads_per_block;
 
-  alloc_particle_info();
+  alloc_data();
 
   gpuErrChk(cudaMemcpy(particle_data[0], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_data[1], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
@@ -147,7 +147,7 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
   }
 }
  
-void call_interact_kernel(float dt) {
+void simulate_time_step(float dt) {
   // call kernel
   interact_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
