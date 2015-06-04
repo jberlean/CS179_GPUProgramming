@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 
 #include "n_body_sim_cuda.cuh"
@@ -12,16 +13,21 @@ int num_particles;
 float* particle_vels[2]; 
 float* particle_data[2]; 
 
-void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
-               float max_vel, int h_num_blocks, int h_num_threads_per_block, int h_algorithm) 
-{
-  num_particles = h_num_particles;
-  
+void alloc_data() {
   particle_vels[0] = new float[num_particles * 2];
   particle_vels[1] = new float[num_particles * 2];
  
   particle_data[0] = new float[num_particles * 3];
   particle_data[1] = new float[num_particles * 3];
+}
+
+void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
+               float max_vel, int h_num_blocks, int h_num_threads_per_block, int h_algorithm) 
+{
+  num_particles = h_num_particles;
+  pingpong = 0;
+  
+  alloc_data();
 
   for (int i = 0; i < num_particles; i++) 
   {
@@ -33,6 +39,16 @@ void init_data(int h_num_particles, float box_width, float box_height, float min
 
     particle_data[0][3*i + 2] = 1;
   }
+}
+void init_data(int h_num_particles, float *h_particle_data, float *h_particle_vels, int h_num_blocks, int h_num_threads_per_block) {
+  num_particles = h_num_particles;
+  pingpong = 0;
+
+  alloc_data();
+
+  memcpy(particle_data[0], h_particle_data, 3 * num_particles * sizeof(float));
+  memcpy(particle_data[1], h_particle_data, 3 * num_particles * sizeof(float));
+  memcpy(particle_vels[0], h_particle_vels, 2 * num_particles * sizeof(float));
 }
 
 void delete_data() {
@@ -46,18 +62,29 @@ void delete_data() {
 
 void add_force(int p1, int p2, float * force) {
  
+  float x1, y1, mass1;
+  float x2, y2, mass2;
+
   float x_dist, y_dist, dist_squared, force_magnitude;
 
-  x_dist = particle_data[pingpong][3 * p1] - particle_data[pingpong][3 * p2];
-  y_dist = particle_data[pingpong][3 * p1 + 1] - particle_data[pingpong][3 * p2 + 1];
-  dist_squared = x_dist * x_dist + y_dist * y_dist + SOFT_FACTOR;
+  x1 = particle_data[pingpong][3 * p1];
+  y1 = particle_data[pingpong][3 * p1 + 1];
+  mass1 = particle_data[pingpong][3 * p1 + 2];
 
-  force_magnitude = particle_data[pingpong][3 * p1 + 2] * particle_data[pingpong][3 * p2 + 2] / dist_squared;
-  force[0] -= x_dist * force_magnitude / sqrt(dist_squared);
-  force[1] -= y_dist * force_magnitude / sqrt(dist_squared);
+  x2 = particle_data[pingpong][3 * p2];
+  y2 = particle_data[pingpong][3 * p2 + 1];
+  mass2 = particle_data[pingpong][3 * p2 + 2];
+
+  x_dist = x1 - x2;
+  y_dist = y1 - y2;
+  dist_cubed = pow(x_dist * x_dist + y_dist * y_dist + SOFT_FACTOR, -1.5f);
+
+  force_magnitude = mass1 * mass2 * dist_cubed;
+  force[0] -= x_dist * force_magnitude;
+  force[1] -= y_dist * force_magnitude;
 }
 
-void call_interact_kernel(float dt) {
+void simulate_time_step(float dt) {
   for (int i = 0; i < num_particles; i++)
   {
     float force[2];
@@ -65,6 +92,7 @@ void call_interact_kernel(float dt) {
     {
       add_force(i, j, force);
     }
+
     particle_vels[1 - pingpong][2 * i] = particle_vels[pingpong][2 * i] + force[0] * dt / particle_data[pingpong][3 * i + 2];
     particle_vels[1 - pingpong][2 * i + 1] = particle_vels[pingpong][2 * i + 1] + force[1] * dt / particle_data[pingpong][3 * i + 2];
     
@@ -75,6 +103,10 @@ void call_interact_kernel(float dt) {
 }
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
-  memcpy(h_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles);
-  memcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles);
+  memcpy(h_particle_data, particle_data[pingpong], sizeof(float) * 3 * num_particles);
+  memcpy(h_particle_vels, particle_vels[pingpong], sizeof(float) * 2 * num_particles);
+}
+
+std::string get_algorithm() {
+  return std::string("CPU");
 }

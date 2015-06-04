@@ -35,7 +35,7 @@ else
 endif
 
 
-TARGETS = sim_simple sim_pxp sim_pxp_opt
+TARGETS = sim_cpu sim_simple sim_pxp sim_pxp_opt
 
 all: $(TARGETS)
 
@@ -49,6 +49,11 @@ n_body_sim_cuda.o: n_body_sim_cuda.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 n_body_sim_cuda_coalesced.o: n_body_sim_cuda_coalesced.cu
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
+
+sim_cpu: n_body_sim.cc n_body_sim_cpu.o
+	$(CC) $< -o $@ n_body_sim_cpu.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
+n_body_sim_cpu.o: n_body_sim_cpu.cc
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 sim_simple: n_body_sim.cc cuda_simple.o

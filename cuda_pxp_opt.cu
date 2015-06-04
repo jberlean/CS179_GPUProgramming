@@ -80,6 +80,7 @@ void init_data(int h_num_particles, float box_width, float box_height, float min
   num_particles = h_num_particles;
   num_blocks = h_num_blocks;
   num_threads_per_block = h_num_threads_per_block;
+  pingpong = 0;
 
   // instantiate particle_vels, particle_data on GPU
   alloc_data();
@@ -102,6 +103,7 @@ void init_data(int h_num_particles, float *h_particle_data, float *h_particle_ve
   num_particles = h_num_particles;
   num_blocks = h_num_blocks;
   num_threads_per_block = h_num_threads_per_block;
+  pingpong = 0;
 
   alloc_data();
 
@@ -214,8 +216,8 @@ void simulate_time_step(float dt) {
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   // copy GPU data into particle_data, particle_vels array
-  gpuErrChk(cudaMemcpy(h_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
-  gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
+  gpuErrChk(cudaMemcpy(h_particle_data, particle_data[pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
+  gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 }
 
 
