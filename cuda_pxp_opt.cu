@@ -30,8 +30,8 @@ int num_threads_per_block;
 int algorithm;
 
 // Device buffer variables
-float *particle_vels[2]; 
-float *particle_data[2];
+float2 *particle_vels[2]; 
+float3 *particle_data[2];
 float2 *forces;
 
 __global__
