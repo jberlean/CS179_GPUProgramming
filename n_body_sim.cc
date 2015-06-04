@@ -139,6 +139,8 @@ int main(int argc, char** argv)
       init_data(num_particles, width, height, -v_max, v_max, NUM_BLOCKS, NUM_THREADS_PER_BLOCK);
   } else {
       printf("Usage: %s <N> <width> <height> <total-time> <num-time-steps> <time-steps-per-frame>\n or\nUsage: %s <input-file>\n", argv[0], argv[0]);
+      printf("When running a GPU-accelerated algorithm, N must be a multiple of 4.\n");
+      printf("When running a PxP algorithm, N must be a multiple of %d\n", NUM_THREADS_PER_BLOCK);
       exit(1);
   }
     
