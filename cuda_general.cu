@@ -9,7 +9,7 @@
 
 // GENERAL UTILITY FUNCTIONS USED BY MULTIPLE ALGORITHMS
 
-void alloc_particle_info(float **particle_data, float **particle_vels) {
+void alloc_particle_info(float3 **particle_data, float2 **particle_vels) {
   // instantiate particle_vels, particle_data on GPU
   gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float2) * num_particles));
   gpuErrChk(cudaMalloc((void **) &particle_vels[1], sizeof(float2) * num_particles));
