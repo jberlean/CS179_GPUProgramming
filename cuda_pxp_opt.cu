@@ -32,7 +32,7 @@ int algorithm;
 // Device buffer variables
 float *particle_vels[2]; 
 float *particle_data[2];
-float *forces;
+float2 *forces;
 
 __global__
 void cudaInitKernel(float * vels_buffer, float * data_buffer1, float * data_buffer2, float * random, float box_width, 
@@ -65,13 +65,13 @@ void cudaInitKernel(float * vels_buffer, float * data_buffer1, float * data_buff
 
 void alloc_data() {
   // instantiate particle_vels, particle_data on GPU
-  gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float) * 2 * num_particles));
-  gpuErrChk(cudaMalloc((void **) &particle_vels[1], sizeof(float) * 2 * num_particles));
+  gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float2) * num_particles));
+  gpuErrChk(cudaMalloc((void **) &particle_vels[1], sizeof(float2) * num_particles));
   
-  gpuErrChk(cudaMalloc((void **) &particle_data[0], sizeof(float) * 3 * num_particles));
-  gpuErrChk(cudaMalloc((void **) &particle_data[1], sizeof(float) * 3 * num_particles));
+  gpuErrChk(cudaMalloc((void **) &particle_data[0], sizeof(float3) * num_particles));
+  gpuErrChk(cudaMalloc((void **) &particle_data[1], sizeof(float3) * num_particles));
 
-  gpuErrChk(cudaMalloc((void **) &forces, 2 * sizeof(float) * num_particles));
+  gpuErrChk(cudaMalloc((void **) &forces, sizeof(float2) * num_particles));
 }
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
@@ -105,7 +105,6 @@ void init_data(int h_num_particles, float *h_particle_data, float *h_particle_ve
 
   alloc_data();
 
-  // TODO: Change this for memory coalescing
   gpuErrChk(cudaMemcpy(particle_data[0], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_data[1], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_vels[0], h_particle_vels, 2 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
@@ -123,7 +122,7 @@ void delete_data() {
 }
 
 __device__
-float2 get_force(float3 pos_data, float * data_old, int num_particles) {
+float2 get_force(float3 pos_data, float3 *data_old, int num_particles) {
   // sum force from every other particle based on mass, position of both particles
   float2 force = {0, 0};
 
@@ -146,7 +145,7 @@ float2 get_force(float3 pos_data, float * data_old, int num_particles) {
 }
 
 __global__
-void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, float * data_old, float * data_new, float dt, int num_particles) {
+void calc_forces_kernel(float2 *forces, float2 *vels_old, float2 *vels_new, float3 *data_old, float3 *data_new, float dt, int num_particles) {
   extern __shared__ float3 sdata[];
   
   int tile_id = blockIdx.x;
@@ -175,8 +174,8 @@ void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, floa
 }
 
 __global__
-void apply_forces_kernel(float * forces, float * vels_old, float * vels_new, float * data_old, 
-                         float * data_new, float dt, int num_particles)
+void apply_forces_kernel(float2 *forces, float2 *vels_old, float2 *vels_new, float3 *data_old, 
+                         float3 *data_new, float dt, int num_particles)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   
@@ -197,7 +196,7 @@ void apply_forces_kernel(float * forces, float * vels_old, float * vels_new, flo
 void simulate_time_step(float dt) {
   // call kernel
 
-  gpuErrChk(cudaMemset(forces, 0, num_particles * 2 * sizeof(float)));
+  gpuErrChk(cudaMemset(forces, 0, num_particles * sizeof(float2)));
 
   calc_forces_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float) * 3>>>
                                                        (forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
