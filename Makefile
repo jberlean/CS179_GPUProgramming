@@ -31,7 +31,7 @@ endif
 ifeq ($(OS_SIZE),32)
       NVCCFLAGS := -m32
 else
-      NVCCFLAGS := -m64 --ptxas-options="-v"
+      NVCCFLAGS := -m64 
 endif
 
 

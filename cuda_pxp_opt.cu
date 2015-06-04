@@ -49,7 +49,7 @@ void apply_forces_kernel(float2 *forces, float2 *vels_old, float2 *vels_new, flo
   {
     float2 force = forces[i];
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; 
     vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 

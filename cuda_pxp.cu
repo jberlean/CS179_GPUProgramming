@@ -31,7 +31,7 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
       force.y += block_force.y;
     }    
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; 
     vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 

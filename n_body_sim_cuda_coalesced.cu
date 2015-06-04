@@ -48,16 +48,6 @@ void cudaInitKernel(float * vels_buffer, float * data_buffer1, float * data_buff
 
     data_buffer2[i + 2 * num_particles] = 1;    
 
-/*    if (i == 0) {
-      data_buffer1[i].z = 1000;
-      data_buffer2[i].z = 1000;
-      data_buffer1[i].x = box_width / 2;
-      data_buffer1[i].y = box_height / 2;
-      vels_buffer[i].x = 0;
-      vels_buffer[i].y = 0;
-    }
-*/
-
     i += blockDim.x * gridDim.x;
   }
 }
@@ -104,7 +94,6 @@ void init_data(int h_num_particles, float *h_particle_data, float *h_particle_ve
 
   alloc_particle_info();
 
-  // TODO: Change this for memory coalescing
   gpuErrChk(cudaMemcpy(particle_data[0], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_data[1], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_vels[0], h_particle_vels, 2 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
@@ -444,7 +433,7 @@ void pxp_kernel(float * vels_old, float * vels_new, float * data_old, float * da
       force.y += block_force.y;
     }    
     
-    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles]; // TODO: replace data_old[i] with pos_data
+    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles]; 
     vels_new[i + num_particles] = vels_old[i + num_particles] + force.y * dt / data_old[i + 2 * num_particles];
     
     data_new[i] = data_old[i] + vels_new[i] * dt; 
@@ -505,7 +494,7 @@ void pxp_opt_particles_kernel(float * forces, float * vels_old, float * vels_new
     force.x = forces[i];
     force.y = forces[i + num_particles];
 
-    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles]; // TODO: replace data_old[i] with pos_data
+    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles]; 
     vels_new[i + num_particles] = vels_old[i + num_particles] + force.y * dt / data_old[i + 2 * num_particles];
     
     data_new[i] = data_old[i] + vels_new[i] * dt; 
@@ -560,7 +549,6 @@ void call_interact_kernel(float dt) {
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   // copy GPU data into particle_data, particle_vels array
-  // TODO: change format 
   gpuErrChk(cudaMemcpy(h_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
   gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 }

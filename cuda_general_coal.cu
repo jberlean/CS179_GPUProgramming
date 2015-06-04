@@ -57,11 +57,13 @@ void cudaInitKernel(float * vels_buffer, float * data_buffer1, float * data_buff
   while (i < num_particles)
   {
     int idx = 4 * i;
+    // Randomly initialize velocities and positions. 
     vels_x[i] = min_vel + random[idx] * (max_vel - min_vel);
     vels_y[i] = min_vel + random[idx + 1] * (max_vel - min_vel);
     pos_x[i] = random[idx + 2] * box_width;
     pos_y[i] = random[idx + 3] * box_height;
 
+    // Set mass to 1. 
     mass1[i] = 1;
     mass2[i] = 1;    
 
