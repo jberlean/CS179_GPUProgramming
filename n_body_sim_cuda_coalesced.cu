@@ -439,7 +439,7 @@ void pxp_kernel(float * vels_old, float * vels_new, float * data_old, float * da
       sdata[tid + 2 * blockDim.x] = data_old[num_tile * blockDim.x + tid + 2 * num_particles];
  
       __syncthreads();
-      float2 block_force = get_force(pos_data, sdata, blockDim.x);
+      float2 block_force = get_force_opt8(pos_data, sdata, blockDim.x);
       force.x += block_force.x;
       force.y += block_force.y;
     }    
@@ -485,8 +485,9 @@ void pxp_opt_forces_kernel(float * forces, float * vels_old, float * vels_new, f
     float2 block_force = get_force(pos_data, sdata, blockDim.x);
     atomicAdd(forces + rid, block_force.x);
     atomicAdd(forces + rid + num_particles, block_force.y);
-    
+   
     __syncthreads();
+
 
     tile_id += gridDim.x;
   }
@@ -543,6 +544,7 @@ void call_interact_kernel(float dt) {
     pxp_opt_particles_kernel<<<num_blocks, num_threads_per_block>>>(forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
+
 
     gpuErrChk(cudaFree(forces));
   } 
