@@ -29,14 +29,12 @@ void output_data(std::ofstream &out, float *particle_data, float *particle_vels,
 }
 
 void load_input_file(char *infile,
-    int &num_blocks, int &num_threads_per_block,
     int &num_particles, float &width, float &height,
     float &total_time, int &num_time_steps, int &time_steps_per_frame) {
   std::ifstream in(infile);
   float *particle_data, *particle_vels;
 
-  in >> num_blocks >> num_threads_per_block >> num_particles >> width >> height
-      >> total_time >> num_time_steps >> time_steps_per_frame;
+  in >> num_particles >> width >> height >> total_time >> num_time_steps >> time_steps_per_frame;
 
   particle_data = new float[3 * num_particles];
   particle_vels = new float[2 * num_particles];
@@ -46,15 +44,13 @@ void load_input_file(char *infile,
         >> particle_vels[2*i] >> particle_vels[2*i + 1];
   }
 
-  init_data(num_particles, particle_data, particle_vels, num_blocks, num_threads_per_block);
+  init_data(num_particles, particle_data, particle_vels, NUM_BLOCKS, NUM_THREADS_PER_BLOCK);
 
   delete[] particle_data;
   delete[] particle_vels;
 }
 
 void run_simulation(
-    int num_blocks,
-    int num_threads_per_block,
     int num_particles,
     float width,
     float height,
@@ -120,7 +116,6 @@ void run_simulation(
 ////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char** argv)
 {
-  int num_blocks, num_threads_per_block;
   int num_particles;
   float width, height;
 
@@ -131,32 +126,19 @@ int main(int argc, char** argv)
 
   // Set command-line arguments
   if (argc == 2) {
-    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
-  } else if(argc == 3 || argc == 9) {
-      if (argc == 3) {
-        width = 512;
-        height = 512;
-        total_time = 10;
-        num_time_steps = 1000;
-        time_steps_per_frame = 10;
-      } else if (argc == 9) {
-        num_blocks = atoi(argv[1]);
-        num_threads_per_block = atoi(argv[2]);
-        num_particles = atoi(argv[3]);
-        width = atof(argv[4]);
-        height = atof(argv[5]);
-        total_time = atof(argv[6]);
-        num_time_steps = atoi(argv[7]);
-        time_steps_per_frame = atoi(argv[8]);
-      }
-      num_blocks = atoi(argv[1]);
-      num_threads_per_block = atoi(argv[2]);
-      num_particles = atoi(argv[3]);
+    load_input_file(argv[1], num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
+  } else if(argc == 7) {
+      num_particles = atoi(argv[1]);
+      width = atof(argv[2]);
+      height = atof(argv[3]);
+      total_time = atof(argv[4]);
+      num_time_steps = atoi(argv[5]);
+      time_steps_per_frame = atoi(argv[6]);
 
       float v_max = std::min(width, height) / 1000.0;
-      init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block);
+      init_data(num_particles, width, height, -v_max, v_max, NUM_BLOCKS, NUM_THREADS_PER_BLOCK);
   } else {
-      printf("Usage: %s <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n", argv[0]);
+      printf("Usage: %s <N> <width> <height> <total-time> <num-time-steps> <time-steps-per-frame>\n or\nUsage: %s <input-file>\n", argv[0], argv[0]);
       exit(1);
   }
     
@@ -170,6 +152,6 @@ int main(int argc, char** argv)
   std::cout << "Initialization complete. Beginning simulation.\n";
 
   // Run simulation with given parameters
-  run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, 
+  run_simulation(num_particles, width, height, total_time, num_time_steps, 
                  time_steps_per_frame);
 }

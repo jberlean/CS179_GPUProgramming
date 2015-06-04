@@ -4,10 +4,8 @@
 
 #include <string>
 
-
-#define SIMPLE 1
-#define PXP 2
-#define PXP_OPT 3
+#define NUM_BLOCKS 32768
+#define NUM_THREADS_PER_BLOCK 128
 
 #define SOFT_FACTOR 10.0f
 
