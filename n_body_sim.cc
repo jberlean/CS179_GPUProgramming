@@ -156,7 +156,7 @@ int main(int argc, char** argv)
       float v_max = std::min(width, height) / 1000.0;
       init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block);
   } else {
-      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n");
+      printf("Usage: %s <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n", argv[0]);
       exit(1);
   }
     
