@@ -9,7 +9,19 @@
 
 #include "n_body_sim_cuda.cuh"
 
-// GENERAL UTILITY FUNCTIONS USED BY MULTIPLE ALGORITHMS
+// GENERAL UTILITY VARS/FUNCTIONS USED BY MULTIPLE ALGORITHMS
+
+
+// COMMON VARIABLES
+
+// Flag for pingpong;
+int pingpong = 0;
+
+// Number particles; determined at runtime.
+int num_particles;    
+ 
+int num_blocks;
+int num_threads_per_block;
 
 
 // macro for error-handling
@@ -23,6 +35,8 @@ inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)
   }
 }
 
+
+// COMMON FUNCTIONS
 
 void alloc_particle_info(float3 **particle_data, float2 **particle_vels);
 

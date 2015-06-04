@@ -5,6 +5,7 @@
 #include <cuda_runtime.h>
 
 #include "n_body_sim_cuda.cuh"
+#include "cuda_general.cuh"
 
 // GENERAL UTILITY FUNCTIONS USED BY MULTIPLE ALGORITHMS
 
