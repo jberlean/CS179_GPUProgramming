@@ -63,16 +63,15 @@ void delete_data() {
   }
 }
 
-void add_force(int p1, int p2, float * force) {
+void add_accel(int p1, int p2, float * accel) {
  
   float x1, y1, mass1;
   float x2, y2, mass2;
 
-  float x_dist, y_dist, dist_cubed, force_magnitude;
+  float x_dist, y_dist, dist_cubed, accel_magnitude;
 
   x1 = particle_data[pingpong][3 * p1];
   y1 = particle_data[pingpong][3 * p1 + 1];
-  mass1 = particle_data[pingpong][3 * p1 + 2];
 
   x2 = particle_data[pingpong][3 * p2];
   y2 = particle_data[pingpong][3 * p2 + 1];
@@ -80,24 +79,23 @@ void add_force(int p1, int p2, float * force) {
 
   x_dist = x1 - x2;
   y_dist = y1 - y2;
-  dist_cubed = pow(x_dist * x_dist + y_dist * y_dist + SOFT_FACTOR, -1.5f);
 
-  force_magnitude = mass1 * mass2 * dist_cubed;
-  force[0] -= x_dist * force_magnitude;
-  force[1] -= y_dist * force_magnitude;
+  accel_magnitude = mass2 * pow(x_dist * x_dist + y_dist * y_dist + SOFT_FACTOR, -1.5f);
+  accel[0] -= x_dist * accel_magnitude;
+  accel[1] -= y_dist * accel_magnitude;
 }
 
 void simulate_time_step(float dt) {
   for (int i = 0; i < num_particles; i++)
   {
-    float force[2] = {0, 0};
+    float accel[2] = {0, 0};
     for (int j = 0; j <  num_particles; j++)
     {
-      add_force(i, j, force);
+      add_accel(i, j, accel);
     }
 
-    particle_vels[1 - pingpong][2 * i] = particle_vels[pingpong][2 * i] + force[0] * dt / particle_data[pingpong][3 * i + 2];
-    particle_vels[1 - pingpong][2 * i + 1] = particle_vels[pingpong][2 * i + 1] + force[1] * dt / particle_data[pingpong][3 * i + 2];
+    particle_vels[1 - pingpong][2 * i] = particle_vels[pingpong][2 * i] + accel[0] * dt;
+    particle_vels[1 - pingpong][2 * i + 1] = particle_vels[pingpong][2 * i + 1] + accel[1] * dt;
     
     particle_data[1 - pingpong][3 * i] = particle_data[pingpong][3 * i] + particle_vels[1 - pingpong][2 * i] * dt;
     particle_data[1 - pingpong][3 * i + 1] = particle_data[pingpong][3 * i + 1] + particle_vels[1 - pingpong][2 * i + 1] * dt;
