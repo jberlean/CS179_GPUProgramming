@@ -456,7 +456,7 @@ void pxp_kernel(float * vels_old, float * vels_new, float * data_old, float * da
 
 __global__
 void pxp_opt_forces_kernel(float * forces, float * vels_old, float * vels_new, float * data_old, 
-                           float * data_new, float dt, int    num_particles) 
+                           float * data_new, float dt, int num_particles) 
 {
   extern __shared__ float sdata[];
   
@@ -482,7 +482,7 @@ void pxp_opt_forces_kernel(float * forces, float * vels_old, float * vels_new, f
     pos_data.y = data_old[rid + num_particles];
     pos_data.z = data_old[rid + 2 * num_particles];
 
-    float2 block_force = get_force_opt8(pos_data, sdata, blockDim.x);
+    float2 block_force = get_force(pos_data, sdata, blockDim.x);
     atomicAdd(forces + rid, block_force.x);
     atomicAdd(forces + rid + num_particles, block_force.y);
     
@@ -539,7 +539,7 @@ void call_interact_kernel(float dt) {
                                                          (forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
-    
+
     pxp_opt_particles_kernel<<<num_blocks, num_threads_per_block>>>(forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
