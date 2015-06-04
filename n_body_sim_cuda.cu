@@ -212,7 +212,7 @@ float2 get_force_opt4(float3 pos_data, float3 * data_old, int num_particles) {
 
   float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
   float soft_factor = SOFT_FACTOR;
-  for (int i = 0; i < num_particles; i+=2)
+  for (int i = 0; i < num_particles; i+=4)
   {
     other_data1 = data_old[i];    
     other_data2 = data_old[i + 1];
@@ -267,7 +267,7 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
   float force_magnitude5, force_magnitude6, force_magnitude7, force_magnitude8;
 
   float soft_factor = SOFT_FACTOR;
-  for (int i = 0; i < num_particles; i+=2)
+  for (int i = 0; i < num_particles; i+=8)
   {
     other_data1 = data_old[i];
     other_data2 = data_old[i + 1];
@@ -394,29 +394,45 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
 }
 
 __global__
-void pxp_opt_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
+void pxp_opt_forces_kernel(float2 * forces, float2 * vels_old, float2 * vels_new, float3 * data_old, 
+                           float3 * data_new, float dt, int num_particles) 
+{
   extern __shared__ float3 sdata[];
   
-  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int tile_id = blockIdx.x;
   int tid = threadIdx.x;
+  
+  int num_tiles_per_col = num_particles / blockDim.x;
+  int num_tiles = num_particles * num_particles / (blockDim.x * blockDim.x);
+
+  while (tile_id < num_tiles)
+  {
+    int rid = (tile_id % num_tiles_per_col) * blockDim.x + tid;
+    int cid = (tile_id/num_tiles_per_col) * blockDim.x + tid;
+    
+    sdata[tid] = data_old[cid];
+ 
+    __syncthreads();
+
+    float2 block_force = get_force(data_old[rid], sdata, blockDim.x);
+    atomicAdd(&forces[rid].x, block_force.x);
+    atomicAdd(&forces[rid].y, block_force.y);
+    
+    __syncthreads();
+
+    tile_id += gridDim.x;
+  }
+}
+
+__global__
+void pxp_opt_particles_kernel(float2 * forces, float2 * vels_old, float2 * vels_new, float3 * data_old, 
+                         float3 * data_new, float dt, int num_particles)
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
   
   while (i < num_particles)
   {
-    float2 force;
-    force.x = 0;
-    force.y = 0; 
-
-    float3 pos_data = data_old[i];
-    // NOTE: num_particles is a multiple of num_threads_per_block.
-    for (int num_tile = 0; num_tile * blockDim.x < num_particles; num_tile++)
-    {
-      __syncthreads();
-      sdata[tid] = data_old[num_tile * blockDim.x + tid];
-      __syncthreads();
-      float2 block_force = get_force_opt1(pos_data, sdata, blockDim.x);
-      force.x += block_force.x;
-      force.y += block_force.y;
-    }    
+    float2 force = forces[i];
     
     vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
     vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
@@ -445,11 +461,22 @@ void call_interact_kernel(float dt) {
   }
   else if (algorithm == PXP_OPT)
   {
-    pxp_opt_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
-                                                        (particle_vels[pingpong], particle_vels[1 - pingpong], 
+    float2 * forces;
+    gpuErrChk(cudaMalloc((void **) &forces, num_particles * sizeof(float2))); 
+    gpuErrChk(cudaMemset(forces, 0, num_particles * sizeof(float2)));
+
+    pxp_opt_forces_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
+                                                         (forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
-  } else {
+
+    pxp_opt_particles_kernel<<<num_blocks, num_threads_per_block>>>(forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
+                                                           particle_data[pingpong], particle_data[1 - pingpong], 
+                                                           dt, num_particles);
+
+    gpuErrChk(cudaFree(forces));
+  } 
+  else {
     std::cout << "Invalid algorithm supplied: " << algorithm << "\n";
   }
 
