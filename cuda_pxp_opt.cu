@@ -35,19 +35,19 @@ float3 *particle_data[2];
 float2 *forces;
 
 __global__
-void cudaInitKernel(float * vels_buffer, float * data_buffer1, float * data_buffer2, float * random, float box_width, 
+void cudaInitKernel(float2 *vels_buffer, float3 *data_buffer1, float3 *data_buffer2, float * random, float box_width, 
                     float box_height, float min_vel, float max_vel, int num_particles)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   while (i < num_particles)
   {
-    vels_buffer[i] = min_vel + random[4 * i] * (max_vel - min_vel);
-    vels_buffer[i + num_particles] = min_vel + random[4 * i + 1] * (max_vel - min_vel);
-    data_buffer1[i] = random[4 * i + 2] * box_width;
-    data_buffer1[i + num_particles] = random[4 * i + 3] * box_height;
-    data_buffer1[i + 2 * num_particles] = 1;
+    vels_buffer[i].x = min_vel + random[4 * i] * (max_vel - min_vel);
+    vels_buffer[i].y = min_vel + random[4 * i + 1] * (max_vel - min_vel);
+    data_buffer1[i].x = random[4 * i + 2] * box_width;
+    data_buffer1[i].y = random[4 * i + 3] * box_height;
+    data_buffer1[i].z = 1;
 
-    data_buffer2[i + 2 * num_particles] = 1;    
+    data_buffer2[i].z = 1;    
 
 /*    if (i == 0) {
       data_buffer1[i].z = 1000;
