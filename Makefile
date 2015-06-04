@@ -35,7 +35,7 @@ else
 endif
 
 
-TARGETS = sim_simple sim_pxp
+TARGETS = n_body_sim n_body_sim_coalesced sim_simple
 
 all: $(TARGETS)
 
@@ -51,20 +51,12 @@ n_body_sim_cuda.o: n_body_sim_cuda.cu
 n_body_sim_cuda_coalesced.o: n_body_sim_cuda_coalesced.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
-sim_simple: n_body_sim.cc cuda_simple.o cuda_general.o 
-	$(CC) $< -o $@ cuda_simple.o cuda_general.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
+sim_simple: n_body_sim.cc cuda_simple.o
+	$(CC) $< -o $@ cuda_simple.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
 
 cuda_simple.o: cuda_simple.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
-cuda_general.o: cuda_general.cu 
-	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
-
-sim_pxp: n_body_sim.cc cuda_pxp.o
-	$(CC) $< -o $@ cuda_pxp.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
-
-cuda_pxp.o: cuda_pxp.cu
-	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 clean:
 	rm -f *.o $(TARGETS)

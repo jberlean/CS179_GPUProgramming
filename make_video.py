@@ -14,16 +14,14 @@ assert (len(sys.argv) == 2), "Please provide the data file as a single command-l
 infile = os.path.realpath(sys.argv[1])
 
 # Make output folder if it doesn't exist
-pngfolder = os.path.realpath(infile[:-4])
-if not os.path.exists(pngfolder):
-  os.mkdir(pngfolder)
-mp4_outfile = infile[:-4] + ".mp4"
+outfolder = os.path.realpath(infile[:-4])
+if not os.path.exists(outfolder):
+  os.mkdir(outfolder)
 
 print "Reading from data file {0}".format(infile)
-print "PNG frames will be in folder {0}".format(pngfolder)
-print "MP4 output will be at {0}".format(mp4_outfile)
+print "Output will be in folder {0}".format(outfolder)
 
-# Create PNGs in <pngfolder> by reading the input file
+# Create PNGs in <outfolder> by reading the input file
 f = open(infile, 'r')
 
 # Read header line
@@ -55,7 +53,7 @@ else:
 
 for frames_processed in range(num_frames):
   frame_num = int(f.readline())
-  outfile = os.path.realpath(os.path.join(pngfolder, "frame{0}.png".format(frame_num)))
+  outfile = os.path.realpath(os.path.join(outfolder, "frame{0}.png".format(frame_num)))
 
   im = Image.new("RGBA", (int(width), int(height)), "white")
 
@@ -63,7 +61,7 @@ for frames_processed in range(num_frames):
 
   for particle in range(num_particles):
     line = f.readline().split(" ")
-    if len(line) != 3 and len(line) != 5:
+    if len(line) != 3:
       print "WARNING: Expected a line of particle data, but got \"{0}\"".format(" ".join(line))
 
     x = float(line[0])
@@ -101,12 +99,16 @@ f.close()
 import moviepy.editor as mpy
 
 fps = num_frames / total_time * 10
+mp4_outfile = os.path.realpath(os.path.join(outfolder, "movie.mp4"))
+gif_outfile = os.path.realpath(os.path.join(outfolder, "movie.gif"))
 
 video = mpy.ImageSequenceClip(pngs, fps = fps)
-video.write_videofile(mp4_outfile, fps = fps)
 
+video.write_videofile(mp4_outfile, fps = fps, write_logfile = True)
 print "Video output to: {0}".format(mp4_outfile)
+
+#video.write_gif(gif_outfile, fps = fps)
+#print "GIF output to: {0}".format(gif_outfile)
 
 if CLEANUP:
   [os.remove(png) for png in pngs]
-  os.rmdir(pngfolder)
