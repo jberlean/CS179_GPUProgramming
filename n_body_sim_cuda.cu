@@ -212,7 +212,7 @@ float2 get_force_opt4(float3 pos_data, float3 * data_old, int num_particles) {
 
   float force_magnitude1, force_magnitude2, force_magnitude3, force_magnitude4;
   float soft_factor = SOFT_FACTOR;
-  for (int i = 0; i < num_particles; i+=2)
+  for (int i = 0; i < num_particles; i+=4)
   {
     other_data1 = data_old[i];    
     other_data2 = data_old[i + 1];
@@ -267,7 +267,7 @@ float2 get_force_opt8(float3 pos_data, float3 * data_old, int num_particles) {
   float force_magnitude5, force_magnitude6, force_magnitude7, force_magnitude8;
 
   float soft_factor = SOFT_FACTOR;
-  for (int i = 0; i < num_particles; i+=2)
+  for (int i = 0; i < num_particles; i+=8)
   {
     other_data1 = data_old[i];
     other_data2 = data_old[i + 1];
