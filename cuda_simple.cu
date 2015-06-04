@@ -4,18 +4,9 @@
 
 #include <cuda_runtime.h>
 
+#include "cuda_general.cuh"
 #include "n_body_sim_cuda.cuh"
 
-// macro for error-handling
-#define gpuErrChk(ans) { gpuAssert((ans), (char*)__FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)
-{
-  if (code != cudaSuccess) 
- {
-    fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-    if (abort) exit(code);
-  }
-}
 
 // Flag for pingpong;
 int pingpong = 0;
@@ -44,7 +35,7 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
     data_buffer1[i].y = random[4 * i + 3] * box_height;
     data_buffer1[i].z = 1;
 
-    data_buffer2[i].z = 1;    
+    data_buffer2[i].z = 1;
 
     i += blockDim.x * gridDim.x;
   }
@@ -52,56 +43,20 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
 
 void alloc_particle_info() {
   // instantiate particle_vels, particle_data on GPU
-  gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float2) * num_particles));
-  gpuErrChk(cudaMalloc((void **) &particle_vels[1], sizeof(float2) * num_particles));
-  
-  gpuErrChk(cudaMalloc((void **) &particle_data[0], sizeof(float3) * num_particles));
-  gpuErrChk(cudaMalloc((void **) &particle_data[1], sizeof(float3) * num_particles));
+  alloc_particle_info(particle_data, particle_vels);
 }
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
                float max_vel, int h_num_blocks, int h_num_threads_per_block) 
 {
-  num_particles = h_num_particles;
-  num_blocks = h_num_blocks;
-  num_threads_per_block = h_num_threads_per_block;
-
-  // instantiate particle_vels, particle_data on GPU
-  alloc_particle_info();
-   
-  // set initial values for particle_vels, particle_data on GPU
-  float * random;
-  gpuErrChk(cudaMalloc((void **) &random, sizeof(float) * num_particles * 4));   
-  
-  curandGenerator_t gen;
-  curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT);
-  curandGenerateUniform(gen, random, num_particles * 4);
-
-  cudaInitKernel<<<num_blocks, num_threads_per_block>>>(particle_vels[0], particle_data[0], particle_data[1], 
-                                                        random, box_width, box_height, min_vel, max_vel, num_particles);
-
-  curandDestroyGenerator(gen);
-  gpuErrChk(cudaFree(random));
+  init_data_uncoalesced(h_num_particles, box_width, box_height, min_vel, max_vel, h_num_blocks, h_num_threads_per_block);
 }
 void init_data(int h_num_particles, float *h_particle_data, float *h_particle_vels, int h_num_blocks, int h_num_threads_per_block) {
-  num_particles = h_num_particles;
-  num_blocks = h_num_blocks;
-  num_threads_per_block = h_num_threads_per_block;
-
-  alloc_particle_info();
-
-  gpuErrChk(cudaMemcpy(particle_data[0], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
-  gpuErrChk(cudaMemcpy(particle_data[1], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
-  gpuErrChk(cudaMemcpy(particle_vels[0], h_particle_vels, 2 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
+  init_data_uncoalesced(h_num_particles, h_particle_data, h_particle_vels, h_num_blocks, h_num_threads_per_block);
 }
 
 void delete_data() {
-  // free all memory on GPU
-  for (int i = 0; i < 2; i++)
-  {
-    gpuErrChk(cudaFree(particle_vels[i]));
-    gpuErrChk(cudaFree(particle_data[i]));
-  }
+  delete_data_uncoalesced(particle_data, particle_vels);
 }
 
 __device__
@@ -162,8 +117,7 @@ void call_interact_kernel(float dt) {
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   // copy GPU data into particle_data, particle_vels array
-  gpuErrChk(cudaMemcpy(h_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
-  gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
+  get_particle_data_uncoalesced(h_particle_data, h_particle_vels);
 }
 
 char* get_algorithm() {
