@@ -122,7 +122,7 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
 
-    force_magnitude1 = pos_data.z * other_data1.z * pow(fma(x_dist1 * x_dist1, y_dist1 * y_dist1, SOFT_FACTOR), -1.5f);
+    force_magnitude1 = pos_data.z * other_data1.z * pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, -1.5f);
 
     force.x -= x_dist1 * force_magnitude1;
     force.y -= y_dist1 * force_magnitude1;

@@ -18,4 +18,6 @@ void call_interact_kernel(float dt);
 
 void get_particle_data(float* h_particle_data, float* h_particle_vels);
 
+char* get_algorithm();
+
 #endif // N_BODY_SIM_CUDA_CUH

@@ -87,7 +87,7 @@ void run_simulation(
     call_interact_kernel(dt);
 
     status_counter += num_particles*num_particles;
-    if (status_counter > 1000000) {
+    if (status_counter > 1000000000) {
       std::cout << "Run " << step << " time steps\n";
       status_counter = 0;
     }
@@ -129,16 +129,16 @@ int main(int argc, char** argv)
   int time_steps_per_frame;
 
   // Set command-line arguments
-  if (argc == 3) {
+  if (argc == 2) {
     load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
-  } else if(argc == 4 || argc == 10) {
-      if (argc == 4) {
+  } else if(argc == 3 || argc == 9) {
+      if (argc == 3) {
         width = 512;
         height = 512;
         total_time = 10;
         num_time_steps = 1000;
         time_steps_per_frame = 10;
-      } else if (argc == 10) {
+      } else if (argc == 9) {
         num_blocks = atoi(argv[1]);
         num_threads_per_block = atoi(argv[2]);
         num_particles = atoi(argv[3]);
