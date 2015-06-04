@@ -34,7 +34,7 @@ float* particle_vels[2];
 float* particle_data[3]; 
 
 #ifdef USE_FORCES_ARRAY
-  float2 *forces;
+  float *forces;
 #endif
 
 __global__
@@ -78,7 +78,7 @@ void alloc_data() {
   gpuErrChk(cudaMalloc((void **) &particle_data[1], sizeof(float) * 3 * num_particles));
 
   #ifdef USE_FORCES_ARRAY
-    gpuErrChk(cudaMalloc((void **) &forces, sizeof(float2) * num_particles));
+    gpuErrChk(cudaMalloc((void **) &forces, 2 * sizeof(float) * num_particles));
   #endif
 }
 
