@@ -1,5 +1,7 @@
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <cmath>
 #include <iostream>
 
 #include "n_body_sim_cuda.cuh"
@@ -22,7 +24,7 @@ void alloc_data() {
 }
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
-               float max_vel, int h_num_blocks, int h_num_threads_per_block, int h_algorithm) 
+               float max_vel, int h_num_blocks, int h_num_threads_per_block) 
 {
   num_particles = h_num_particles;
   pingpong = 0;
@@ -31,13 +33,14 @@ void init_data(int h_num_particles, float box_width, float box_height, float min
 
   for (int i = 0; i < num_particles; i++) 
   {
-    particle_vels[0][2*i] = rand() % (max_vel - min_vel) + min_vel;
-    particle_vels[0][2*i + 1] = rand() % (max_vel - min_vel) + min_vel;
+    particle_vels[0][2*i] = (static_cast<float>(rand()) / RAND_MAX) * (max_vel - min_vel) + min_vel;
+    particle_vels[0][2*i + 1] = (static_cast<float>(rand()) / RAND_MAX) * (max_vel - min_vel) + min_vel;
 
-    particle_data[0][3*i] = rand() % box_width;
-    particle_data[0][3*i + 1] = rand() % box_height;
+    particle_data[0][3*i] = (static_cast<float>(rand()) / RAND_MAX) * box_width;
+    particle_data[0][3*i + 1] = (static_cast<float>(rand()) / RAND_MAX) * box_width;
 
     particle_data[0][3*i + 2] = 1;
+    particle_data[1][3*i + 2] = 1;
   }
 }
 void init_data(int h_num_particles, float *h_particle_data, float *h_particle_vels, int h_num_blocks, int h_num_threads_per_block) {
@@ -65,7 +68,7 @@ void add_force(int p1, int p2, float * force) {
   float x1, y1, mass1;
   float x2, y2, mass2;
 
-  float x_dist, y_dist, dist_squared, force_magnitude;
+  float x_dist, y_dist, dist_cubed, force_magnitude;
 
   x1 = particle_data[pingpong][3 * p1];
   y1 = particle_data[pingpong][3 * p1 + 1];
