@@ -35,7 +35,7 @@ else
 endif
 
 
-TARGETS = sim_cpu sim_simple sim_pxp sim_pxp_opt sim_simple_coalesced
+TARGETS = sim_cpu sim_simple sim_pxp sim_pxp_opt sim_simple_coalesced sim_pxp_coalesced sim_pxp_opt_coalesced
 
 all: $(TARGETS)
 
@@ -74,6 +74,16 @@ cuda_pxp_opt.o: cuda_pxp_opt.cu
 sim_simple_coalesced: n_body_sim.cc cuda_simple_coal.o
 	$(CC) $< -o $@ cuda_simple_coal.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
 cuda_simple_coal.o: cuda_simple_coal.cu
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
+
+sim_pxp_coalesced: n_body_sim.cc cuda_pxp_coal.o
+	$(CC) $< -o $@ cuda_pxp_coal.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
+cuda_pxp_coal.o: cuda_pxp_coal.cu
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
+
+sim_pxp_opt_coalesced: n_body_sim.cc cuda_pxp_opt_coal.o
+	$(CC) $< -o $@ cuda_pxp_opt_coal.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
+cuda_pxp_opt_coal.o: cuda_pxp_opt_coal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 
