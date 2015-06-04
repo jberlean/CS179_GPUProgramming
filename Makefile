@@ -51,10 +51,13 @@ n_body_sim_cuda.o: n_body_sim_cuda.cu
 n_body_sim_cuda_coalesced.o: n_body_sim_cuda_coalesced.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
-sim_simple: n_body_sim.cc cuda_simple.o
-	$(CC) $< -o $@ cuda_simple.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
+sim_simple: n_body_sim.cc cuda_simple.o cuda_general.o 
+	$(CC) $< -o $@ cuda_simple.o cuda_general.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
 
 cuda_simple.o: cuda_simple.cu
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
+
+cuda_general.o: cuda_general.cu 
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 sim_pxp: n_body_sim.cc cuda_pxp.o

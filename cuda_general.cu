@@ -9,7 +9,8 @@
 
 // GENERAL UTILITY FUNCTIONS USED BY MULTIPLE ALGORITHMS
 
-void alloc_particle_info(float3 **particle_data, float2 **particle_vels) {
+
+void alloc_particle_info(float3 **particle_data, float2 **particle_vels, int num_particles) {
   // instantiate particle_vels, particle_data on GPU
   gpuErrChk(cudaMalloc((void **) &particle_vels[0], sizeof(float2) * num_particles));
   gpuErrChk(cudaMalloc((void **) &particle_vels[1], sizeof(float2) * num_particles));
@@ -48,15 +49,12 @@ void cudaInitKernel_uncoalesced(float2 * vels_buffer, float3 * data_buffer1, flo
 }
 
 
-void init_data_uncoalesced(int h_num_particles, float box_width, float box_height, float min_vel, 
-               float max_vel, int h_num_blocks, int h_num_threads_per_block, float3 **particle_data, float2 **particle_vels) 
+void init_data_uncoalesced(int num_particles, float box_width, float box_height, float min_vel, 
+               float max_vel, int num_blocks, int num_threads_per_block, float3 **particle_data, float2 **particle_vels) 
 {
-  num_particles = h_num_particles;
-  num_blocks = h_num_blocks;
-  num_threads_per_block = h_num_threads_per_block;
 
   // instantiate particle_vels, particle_data on GPU
-  alloc_particle_info();
+  alloc_particle_info(particle_data, particle_vels, num_particles);
    
   // set initial values for particle_vels, particle_data on GPU
   float * random;
@@ -72,20 +70,17 @@ void init_data_uncoalesced(int h_num_particles, float box_width, float box_heigh
   curandDestroyGenerator(gen);
   gpuErrChk(cudaFree(random));
 }
-void init_data_uncoalesced(int h_num_particles, int h_num_blocks, int h_num_threads_per_block,
+void init_data_uncoalesced(int num_particles, 
     float *h_particle_data, float *h_particle_vels, float3 **particle_data, float2 **particle_vels) {
-  num_particles = h_num_particles;
-  num_blocks = h_num_blocks;
-  num_threads_per_block = h_num_threads_per_block;
 
-  alloc_particle_info();
+  alloc_particle_info(particle_data, particle_vels, num_particles);
 
   gpuErrChk(cudaMemcpy(particle_data[0], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_data[1], h_particle_data, 3 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
   gpuErrChk(cudaMemcpy(particle_vels[0], h_particle_vels, 2 * num_particles * sizeof(float), cudaMemcpyHostToDevice));
 }
 
-void delete_data_uncoalesced(float **particle_data, float **particle_vels) {
+void delete_data_uncoalesced(float3 **particle_data, float2 **particle_vels) {
   // free all memory on GPU
   for (int i = 0; i < 2; i++)
   {
@@ -94,8 +89,8 @@ void delete_data_uncoalesced(float **particle_data, float **particle_vels) {
   }
 }
 
-void get_particle_data_uncoalesced(float * h_particle_data, float * h_particle_vels, float3 **particle_data, float2 **particle_vels) {
+void get_particle_data_uncoalesced(float * h_particle_data, float * h_particle_vels, float3 *particle_data, float2 *particle_vels, int num_particles) {
   // copy GPU data into particle_data, particle_vels array
-  gpuErrChk(cudaMemcpy(h_particle_data, particle_data[1 - pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
-  gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
+  gpuErrChk(cudaMemcpy(h_particle_data, particle_data, sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
+  gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels, sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 }

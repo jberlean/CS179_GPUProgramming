@@ -7,6 +7,15 @@
 #include "cuda_general.cuh"
 #include "n_body_sim_cuda.cuh"
 
+// Flag for pingpong;
+int pingpong = 0;
+
+// Number particles; determined at runtime.
+int num_particles;    
+ 
+int num_blocks;
+int num_threads_per_block;
+
 // Device buffer variables
 float2* particle_vels[2]; // x and y represent velocity in 2D
 float3* particle_data[2]; // x and y represent position in 2D, z represents mass
@@ -32,16 +41,24 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
 
 void alloc_particle_info() {
   // instantiate particle_vels, particle_data on GPU
-  alloc_particle_info(particle_data, particle_vels);
+  alloc_particle_info(particle_data, particle_vels, num_particles);
 }
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
                float max_vel, int h_num_blocks, int h_num_threads_per_block) 
 {
-  init_data_uncoalesced(h_num_particles, box_width, box_height, min_vel, max_vel, h_num_blocks, h_num_threads_per_block);
+  num_particles = h_num_particles;
+  num_blocks = h_num_blocks;
+  num_threads_per_block = h_num_threads_per_block;
+
+  init_data_uncoalesced(h_num_particles, box_width, box_height, min_vel, max_vel, h_num_blocks, h_num_threads_per_block, particle_data, particle_vels);
 }
 void init_data(int h_num_particles, int h_num_blocks, int h_num_threads_per_block, float *h_particle_data, float *h_particle_vels) {
-  init_data_uncoalesced(h_num_particles, h_num_blocks, h_num_threads_per_block, h_particle_data, h_particle_vels, particle_data, particle_vels);
+  num_particles = h_num_particles;
+  num_blocks = h_num_blocks;
+  num_threads_per_block = h_num_threads_per_block;
+  
+  init_data_uncoalesced(h_num_particles, h_particle_data, h_particle_vels, particle_data, particle_vels);
 }
 
 void delete_data() {
@@ -106,7 +123,7 @@ void call_interact_kernel(float dt) {
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   // copy GPU data into particle_data, particle_vels array
-  get_particle_data_uncoalesced(h_particle_data, h_particle_vels, particle_data, particle_vels);
+  get_particle_data_uncoalesced(h_particle_data, h_particle_vels, particle_data[1 - pingpong], particle_vels[1 - pingpong], num_particles);
 }
 
 char* get_algorithm() {
