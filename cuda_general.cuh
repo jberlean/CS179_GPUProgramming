@@ -24,7 +24,7 @@ inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)
 }
 
 
-void alloc_particle_info(float **particle_data, float **particle_vels);
+void alloc_particle_info(float3 **particle_data, float2 **particle_vels);
 
 __global__
 void cudaInitKernel_uncoalesced(float2 * vels_buffer, float3 * data_buffer1, float3 * data_buffer2, float * random, float box_width, 
@@ -36,7 +36,7 @@ void init_data_uncoalesced(int h_num_particles, float box_width, float box_heigh
 
 void init_data_uncoalesced(int h_num_particles, float *h_particle_data, float *h_particle_vels, int h_num_blocks, int h_num_threads_per_block);
 
-void delete_data_uncoalesced(float **particle_data, float **particle_vels);
+void delete_data_uncoalesced(float3 **particle_data, float2 **particle_vels);
 
 void get_particle_data_uncoalesced(float * h_particle_data, float * h_particle_vels);
 
