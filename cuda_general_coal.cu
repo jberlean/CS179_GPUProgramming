@@ -162,6 +162,8 @@ float2 get_accel(float3 pos_data, float * data_old, int num_particles) {
   float *mass = data_old + 2 * num_particles;
 
   float accel_mag1, accel_mag2, accel_mag3, accel_mag4;
+
+  // Four-fold loop unrolling. 
   for (int i = 0; i < num_particles; i += 4)
   {
     other_data1.x = pos_x[i];

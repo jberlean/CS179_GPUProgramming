@@ -22,6 +22,7 @@ void calc_accel_kernel(float2 *accel, float2 *vels_old, float2 *vels_new, float3
 
   while (tile_id < num_tiles)
   {
+    // Calculate row id and column id based on tile location.
     int rid = (tile_id % num_tiles_per_col) * blockDim.x + tid;
     int cid = (tile_id/num_tiles_per_col) * blockDim.x + tid;
     
