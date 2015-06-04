@@ -6,10 +6,11 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, char* algorithm) {
+void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, std::string algorithm) {
   out << num_particles << " "
       << width << " "
       << height << " "
