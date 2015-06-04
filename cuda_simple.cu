@@ -11,7 +11,7 @@
 inline void gpuAssert(cudaError_t code, char* file, int line, bool abort=true)
 {
   if (code != cudaSuccess) 
-  {
+ {
     fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
     if (abort) exit(code);
   }
@@ -111,8 +111,8 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
   force.x = 0;
   force.y = 0;
 
-  float3 other_data; // saves about 3s @ 128 threads/block and 1024 particles to store data_old[i], x_dist, and y_dist locally
-  float x_dist, y_dist;
+  float3 other_data1; // saves about 3s @ 128 threads/block and 1024 particles to store data_old[i], x_dist, and y_dist locally
+  float x_dist1, y_dist1;
 
   float force_magnitude1;
   //float soft_factor = SOFT_FACTOR;
@@ -124,8 +124,8 @@ float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
 
     force_magnitude1 = pos_data.z * other_data1.z * pow(fma(x_dist1 * x_dist1, y_dist1 * y_dist1, SOFT_FACTOR), -1.5f);
 
-    force.x -= x_dist1 * accel_magnitude1;
-    force.y -= y_dist1 * accel_magnitude1;
+    force.x -= x_dist1 * force_magnitude1;
+    force.y -= y_dist1 * force_magnitude1;
   }
   return force;  
 }
