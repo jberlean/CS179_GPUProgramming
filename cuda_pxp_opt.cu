@@ -147,7 +147,7 @@ float2 get_force(float3 pos_data, float * data_old, int num_particles) {
 
 __global__
 void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, float * data_old, float * data_new, float dt, int num_particles) {
-  extern __shared__ float sdata[];
+  extern __shared__ float3 sdata[];
   
   int tile_id = blockIdx.x;
   int tid = threadIdx.x;
@@ -155,37 +155,22 @@ void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, floa
   int num_tiles_per_col = num_particles / blockDim.x;
   int num_tiles = num_particles * num_particles / (blockDim.x * blockDim.x);
 
-  float3 pos_data;
-  
-  pos_data.x = data_old[rid];
-  pos_data.y = data_old[rid + num_particles];
-  pos_data.z = data_old[rid + 2 * num_particles];
-
   while (tile_id < num_tiles)
   {
     int rid = (tile_id % num_tiles_per_col) * blockDim.x + tid;
     int cid = (tile_id/num_tiles_per_col) * blockDim.x + tid;
-
+    
     sdata[tid] = data_old[cid];
-    sdata[tid + blockDim.x] = data_old[cid + num_particles];
-    sdata[tid + 2 * blockDim.x] = data_old[cid + 2 * num_particles];
  
     __syncthreads();
 
-    float2 block_force = get_force(pos_data, sdata, blockDim.x);
-    atomicAdd(forces + rid, block_force.x);
-    atomicAdd(forces + rid + num_particles, block_force.y);
+    float2 block_force = get_force(data_old[rid], sdata, blockDim.x);
+    atomicAdd(&forces[rid].x, block_force.x);
+    atomicAdd(&forces[rid].y, block_force.y);
     
     __syncthreads();
 
     tile_id += gridDim.x;
-
-    // Check if need to reload pos_data from global memory
-    if (gridDim.x % num_tiles_per_col == 0) {
-      pos_data.x = data_old[rid];
-      pos_data.y = data_old[rid + num_particles];
-      pos_data.z = data_old[rid + 2 * num_particles];
-    }
   }
 }
 
@@ -197,15 +182,13 @@ void apply_forces_kernel(float * forces, float * vels_old, float * vels_new, flo
   
   while (i < num_particles)
   {
-    float2 force;
-    force.x = forces[i];
-    force.y = forces[i + num_particles];
-
-    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles]; // TODO: replace data_old[i] with pos_data
-    vels_new[i + num_particles] = vels_old[i + num_particles] + force.y * dt / data_old[i + 2 * num_particles];
+    float2 force = forces[i];
     
-    data_new[i] = data_old[i] + vels_new[i] * dt; 
-    data_new[i + num_particles] = data_old[i + num_particles] + vels_new[i + num_particles] * dt;
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
+    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
+    
+    data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
+    data_new[i].y = data_old[i].y + vels_new[i].y * dt;
 
     i += blockDim.x * gridDim.x;
   }
