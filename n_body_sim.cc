@@ -9,7 +9,7 @@
 
 #include "n_body_sim_cuda.cuh"
 
-void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, int algorithm) {
+void output_data_header(std::ofstream &out, int num_particles, float width, float height, float total_time, int num_time_steps, int time_steps_per_frame, char* algorithm) {
   out << num_particles << " "
       << width << " "
       << height << " "
@@ -30,7 +30,7 @@ void output_data(std::ofstream &out, float *particle_data, float *particle_vels,
 void load_input_file(char *infile,
     int &num_blocks, int &num_threads_per_block,
     int &num_particles, float &width, float &height,
-    float &total_time, int &num_time_steps, int &time_steps_per_frame, int algorithm) {
+    float &total_time, int &num_time_steps, int &time_steps_per_frame) {
   std::ifstream in(infile);
   float *particle_data, *particle_vels;
 
@@ -45,23 +45,10 @@ void load_input_file(char *infile,
         >> particle_vels[2*i] >> particle_vels[2*i + 1];
   }
 
-  init_data(num_particles, particle_data, particle_vels, num_blocks, num_threads_per_block, algorithm);
+  init_data(num_particles, particle_data, particle_vels, num_blocks, num_threads_per_block);
 
   delete[] particle_data;
   delete[] particle_vels;
-}
-
-int parse_alg_input(int alg) {
-  if (alg == 1)
-    return SIMPLE;
-  else if (alg == 2)
-    return PXP;
-  else if (alg == 3)
-    return PXP_OPT;
-  else
-    std::cout << "Invalid algorithm given: " << alg << std::endl;
-
-  exit(1);
 }
 
 void run_simulation(
@@ -72,8 +59,7 @@ void run_simulation(
     float height,
     float total_time,
     int num_time_steps,
-    int time_steps_per_frame,
-    int algorithm) {
+    int time_steps_per_frame) {
   float dt;
   std::ofstream out;
 
@@ -92,7 +78,7 @@ void run_simulation(
   particle_vels = new float[num_particles * 2];
 
   // Output header for data file
-  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
+  output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, get_algorithm());
 
   // Run <time_steps> iterations of simulation
   int status_counter = 0;
@@ -134,7 +120,6 @@ void run_simulation(
 int main(int argc, char** argv)
 {
   int num_blocks, num_threads_per_block;
-  int algorithm=-1;
   int num_particles;
   float width, height;
 
@@ -145,8 +130,7 @@ int main(int argc, char** argv)
 
   // Set command-line arguments
   if (argc == 3) {
-    algorithm = parse_alg_input(atoi(argv[2]));
-    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, algorithm);
+    load_input_file(argv[1], num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame);
   } else if(argc == 4 || argc == 10) {
       if (argc == 4) {
         width = 512;
@@ -154,7 +138,6 @@ int main(int argc, char** argv)
         total_time = 10;
         num_time_steps = 1000;
         time_steps_per_frame = 10;
-        algorithm = SIMPLE;
       } else if (argc == 10) {
         num_blocks = atoi(argv[1]);
         num_threads_per_block = atoi(argv[2]);
@@ -164,16 +147,15 @@ int main(int argc, char** argv)
         total_time = atof(argv[6]);
         num_time_steps = atoi(argv[7]);
         time_steps_per_frame = atoi(argv[8]);
-        algorithm = parse_alg_input(atoi(argv[9]));
       }
       num_blocks = atoi(argv[1]);
       num_threads_per_block = atoi(argv[2]);
       num_particles = atoi(argv[3]);
 
       float v_max = std::min(width, height) / 1000.0;
-      init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block, algorithm);
+      init_data(num_particles, width, height, -v_max, v_max, num_blocks, num_threads_per_block);
   } else {
-      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame> <algorithm>]\n");
+      printf("Usage: n_body_sim <num-blocks> <num-threads-per-block> <N> [<width> <height> <total-time> <num-time-steps> <time-steps-per-frame>]\n");
       exit(1);
   }
     
@@ -188,5 +170,5 @@ int main(int argc, char** argv)
 
   // Run simulation with given parameters
   run_simulation(num_blocks, num_threads_per_block, num_particles, width, height, total_time, num_time_steps, 
-                 time_steps_per_frame, algorithm);
+                 time_steps_per_frame);
 }
