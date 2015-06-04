@@ -34,7 +34,7 @@ __global__
 void cudaInitKernel(float * vels_buffer, float * data_buffer1, float * data_buffer2, float * random, float box_width, 
                     float box_height, float min_vel, float max_vel, int num_particles)
 {
-  float *vels_x, vels_y;
+  float *vels_x, *vels_y;
   float *pos_x, *pos_y;
   float *mass1, *mass2;
 
@@ -156,7 +156,7 @@ float2 get_force(float3 pos_data, float * data_old, int num_particles) {
 }
 
 __global__
-void simple_kernel(float * vels_old, float * vels_new, float * data_old, float * data_new, float dt, int num_particles) {
+void interact_kernel(float * vels_old, float * vels_new, float * data_old, float * data_new, float dt, int num_particles) {
   // each thread handles a particle
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   
@@ -181,7 +181,7 @@ void simple_kernel(float * vels_old, float * vels_new, float * data_old, float *
  
 void simulate_time_step(float dt) {
   // call kernel
-  simple_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
+  interact_kernel<<<num_blocks, num_threads_per_block>>>(particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
   

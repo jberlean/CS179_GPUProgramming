@@ -90,7 +90,7 @@ void add_force(int p1, int p2, float * force) {
 void simulate_time_step(float dt) {
   for (int i = 0; i < num_particles; i++)
   {
-    float force[2];
+    float force[2] = {0, 0};
     for (int j = 0; j <  num_particles; j++)
     {
       add_force(i, j, force);
