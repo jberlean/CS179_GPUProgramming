@@ -81,12 +81,12 @@ void run_simulation(
   output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, get_algorithm());
 
   // Run <time_steps> iterations of simulation
-  int status_counter = 0;
+  long status_counter = 0;
   for (int step = 0; step < num_time_steps; step++) {
     // Run kernel
     call_interact_kernel(dt);
 
-    status_counter += num_particles;
+    status_counter += num_particles*num_particles;
     if (status_counter > 1000000) {
       std::cout << "Run " << step << " time steps\n";
       status_counter = 0;

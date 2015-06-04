@@ -507,21 +507,22 @@ void ja_forces_kernel(float * forces, float * vels_old, float * vels_new, float 
   int num_tiles_per_col = num_particles / blockDim.x;
   int num_tiles = num_particles * num_particles / (blockDim.x * blockDim.x);
 
+  float3 pos_data;
+  
+  pos_data.x = data_old[rid];
+  pos_data.y = data_old[rid + num_particles];
+  pos_data.z = data_old[rid + 2 * num_particles];
+
   while (tile_id < num_tiles)
   {
     int rid = (tile_id % num_tiles_per_col) * blockDim.x + tid;
     int cid = (tile_id/num_tiles_per_col) * blockDim.x + tid;
-    
+
     sdata[tid] = data_old[cid];
     sdata[tid + blockDim.x] = data_old[cid + num_particles];
     sdata[tid + 2 * blockDim.x] = data_old[cid + 2 * num_particles];
  
     __syncthreads();
-
-    float3 pos_data;
-    pos_data.x = data_old[rid];
-    pos_data.y = data_old[rid + num_particles];
-    pos_data.z = data_old[rid + 2 * num_particles];
 
     float2 block_force = get_force_opt8(pos_data, sdata, blockDim.x);
     atomicAdd(forces[rid], block_force.x);
@@ -530,6 +531,13 @@ void ja_forces_kernel(float * forces, float * vels_old, float * vels_new, float 
     __syncthreads();
 
     tile_id += gridDim.x;
+
+    // Check if need to reload pos_data from global memory
+    if (gridDim.x % num_tiles_per_col == 0) {
+      pos_data.x = data_old[rid];
+      pos_data.y = data_old[rid + num_particles];
+      pos_data.z = data_old[rid + 2 * num_particles];
+    }
   }
 }
 
