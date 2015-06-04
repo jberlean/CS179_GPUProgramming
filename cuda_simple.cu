@@ -5,7 +5,7 @@
 
 #include <cuda_runtime.h>
 
-#include "cuda_general_noncoal.cuh"
+#include "cuda_general_noncoal.cu"
 #include "n_body_sim_cuda.cuh"
 
 
