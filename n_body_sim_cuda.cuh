@@ -10,7 +10,7 @@
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
                float max_vel, int h_num_blocks, int h_num_threads_per_block);
-void init_data(int h_num_particles, float *h_particle_data, float *h_particle_vels, int h_num_blocks, int h_num_threads_per_block);
+void init_data(int h_num_particles, int h_num_blocks, int h_num_threads_per_block, float *h_particle_data, float *h_particle_vels);
 
 void delete_data();
 

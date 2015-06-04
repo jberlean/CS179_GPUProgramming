@@ -45,7 +45,7 @@ void load_input_file(char *infile,
         >> particle_vels[2*i] >> particle_vels[2*i + 1];
   }
 
-  init_data(num_particles, particle_data, particle_vels, num_blocks, num_threads_per_block);
+  init_data(num_particles, num_blocks, num_threads_per_block, particle_data, particle_vels);
 
   delete[] particle_data;
   delete[] particle_vels;
@@ -80,6 +80,8 @@ void run_simulation(
   // Output header for data file
   output_data_header(out, num_particles, width, height, total_time, num_time_steps, time_steps_per_frame, get_algorithm());
 
+
+  std::cout << "Running " << num_time_steps << "time steps...\n";
   // Run <time_steps> iterations of simulation
   long status_counter = 0;
   for (int step = 0; step < num_time_steps; step++) {
@@ -87,7 +89,11 @@ void run_simulation(
     call_interact_kernel(dt);
 
     status_counter += num_particles*num_particles;
+<<<<<<< HEAD
     if (status_counter > 1000000000) {
+=======
+    if (status_counter > 100000000) {
+>>>>>>> 25bcf8b048e77203147c8612e13f0122eaf11e4c
       std::cout << "Run " << step << " time steps\n";
       status_counter = 0;
     }
