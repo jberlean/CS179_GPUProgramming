@@ -1,6 +1,7 @@
 #include <curand.h>
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 #include <cuda_runtime.h>
 
@@ -163,6 +164,6 @@ void get_particle_data(float * h_particle_data, float * h_particle_vels) {
   gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[1 - pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 }
 
-char* get_algorithm() {
-  return "SIMPLE";
+std::string get_algorithm() {
+  return std::string("SIMPLE");
 }

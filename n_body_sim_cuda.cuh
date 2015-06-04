@@ -2,6 +2,9 @@
 #ifndef N_BODY_SIM_CUDA_CUH
 #define N_BODY_SIM_CUDA_CUH
 
+#include <string>
+
+
 #define SIMPLE 1
 #define PXP 2
 #define PXP_OPT 3
@@ -18,6 +21,6 @@ void call_interact_kernel(float dt);
 
 void get_particle_data(float* h_particle_data, float* h_particle_vels);
 
-char* get_algorithm();
+std::string get_algorithm();
 
 #endif // N_BODY_SIM_CUDA_CUH
