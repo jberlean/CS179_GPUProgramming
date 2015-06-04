@@ -173,8 +173,8 @@ void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, floa
     __syncthreads();
 
     float2 block_force = get_force(pos_data, sdata, blockDim.x);
-    atomicAdd(forces[rid], block_force.x);
-    atomicAdd(forces[rid + num_particles], block_force.y);
+    atomicAdd(forces + rid, block_force.x);
+    atomicAdd(forces + rid + num_particles, block_force.y);
     
     __syncthreads();
 
@@ -217,7 +217,7 @@ void simulate_time_step(float dt) {
   gpuErrChk(cudaMemset(forces, 0, num_particles * 2 * sizeof(float)));
 
   calc_forces_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float) * 3>>>
-                                                       (particle_vels[pingpong], particle_vels[1 - pingpong], 
+                                                       (forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                          particle_data[pingpong], particle_data[1 - pingpong], 
                                                          dt, num_particles);
   
