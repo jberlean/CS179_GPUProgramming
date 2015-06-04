@@ -483,8 +483,8 @@ void pxp_opt_forces_kernel(float * forces, float * vels_old, float * vels_new, f
     pos_data.z = data_old[rid + 2 * num_particles];
 
     float2 block_force = get_force_opt8(pos_data, sdata, blockDim.x);
-    atomicAdd(forces[rid], block_force.x);
-    atomicAdd(forces[rid + num_particles], block_force.y);
+    atomicAdd(forces + rid, block_force.x);
+    atomicAdd(forces + rid + num_particles, block_force.y);
     
     __syncthreads();
 
