@@ -21,10 +21,10 @@ void interact_kernel(float * vels_old, float * vels_new, float * data_old, float
     pos_data.y = data_old[i + num_particles];
     pos_data.z = data_old[i + 2 * num_particles];
     
-    float2 force = get_force(pos_data, data_old, num_particles);
+    float2 acc = get_accel(pos_data, data_old, num_particles);
     
-    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles];
-    vels_new[i + num_particles] = vels_old[i + num_particles] + force.y * dt / data_old[i + 2 * num_particles];
+    vels_new[i] = vels_old[i] + acc.x * dt;
+    vels_new[i + num_particles] = vels_old[i + num_particles] + acc.y * dt;
     
     data_new[i] = data_old[i] + vels_new[i] * dt; 
     data_new[i + num_particles] = data_old[i + num_particles] + vels_new[i + num_particles] * dt;

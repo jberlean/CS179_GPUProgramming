@@ -1,4 +1,4 @@
-#define USE_FORCES_ARRAY
+#define USE_ACCEL_ARRAY
 
 #include <curand.h>
 #include <cstdio>
@@ -11,7 +11,7 @@
 #include "cuda_general_coal.cu"
 
 __global__
-void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, float * data_old, 
+void calc_accel_kernel(float * accel, float * vels_old, float * vels_new, float * data_old, 
                            float * data_new, float dt, int num_particles) 
 {
   extern __shared__ float sdata[];
@@ -38,9 +38,9 @@ void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, floa
     pos_data.y = data_old[rid + num_particles];
     pos_data.z = data_old[rid + 2 * num_particles];
 
-    float2 block_force = get_force(pos_data, sdata, blockDim.x);
-    atomicAdd(forces + rid, block_force.x);
-    atomicAdd(forces + rid + num_particles, block_force.y);
+    float2 block_accel = get_accel(pos_data, sdata, blockDim.x);
+    atomicAdd(accel + rid, block_accel.x);
+    atomicAdd(accel + rid + num_particles, block_accel.y);
    
     __syncthreads();
 
@@ -50,19 +50,19 @@ void calc_forces_kernel(float * forces, float * vels_old, float * vels_new, floa
 }
 
 __global__
-void apply_forces_kernel(float * forces, float * vels_old, float * vels_new, float * data_old, 
+void apply_accel_kernel(float * accel, float * vels_old, float * vels_new, float * data_old, 
                          float * data_new, float dt, int num_particles)
 {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   
   while (i < num_particles)
   {
-    float2 force;
-    force.x = forces[i];
-    force.y = forces[i + num_particles];
+    float2 acc;
+    acc.x = accel[i];
+    acc.y = accel[i + num_particles];
 
-    vels_new[i] = vels_old[i] + force.x * dt / data_old[i + 2 * num_particles]; // TODO: replace data_old[i] with pos_data
-    vels_new[i + num_particles] = vels_old[i + num_particles] + force.y * dt / data_old[i + 2 * num_particles];
+    vels_new[i] = vels_old[i] + acc.x * dt; // TODO: replace data_old[i] with pos_data
+    vels_new[i + num_particles] = vels_old[i + num_particles] + acc.y * dt;
     
     data_new[i] = data_old[i] + vels_new[i] * dt; 
     data_new[i + num_particles] = data_old[i + num_particles] + vels_new[i + num_particles] * dt;
@@ -73,14 +73,14 @@ void apply_forces_kernel(float * forces, float * vels_old, float * vels_new, flo
  
 void simulate_time_step(float dt) {
   // call kernel
-  gpuErrChk(cudaMemset(forces, 0, num_particles * sizeof(float2)));
+  gpuErrChk(cudaMemset(accel, 0, num_particles * sizeof(float2)));
 
-  calc_forces_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float) * 3>>>
-                                                       (forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
+  calc_accel_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float) * 3>>>
+                                                       (accel, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                          particle_data[pingpong], particle_data[1 - pingpong], 
                                                          dt, num_particles);
 
-  apply_forces_kernel<<<num_blocks, num_threads_per_block>>>(forces, particle_vels[pingpong], particle_vels[1 - pingpong], 
+  apply_accel_kernel<<<num_blocks, num_threads_per_block>>>(accel, particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                          particle_data[pingpong], particle_data[1 - pingpong], 
                                                          dt, num_particles);
   

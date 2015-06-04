@@ -17,7 +17,7 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
   
   while (i < num_particles)
   {
-    float2 force = {0, 0};
+    float2 acc = {0, 0};
 
     float3 pos_data = data_old[i];
     // NOTE: num_particles is a multiple of num_threads_per_block.
@@ -26,13 +26,13 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
       __syncthreads();
       sdata[tid] = data_old[num_tile * blockDim.x + tid];
       __syncthreads();
-      float2 block_force = get_force(pos_data, sdata, blockDim.x);
-      force.x += block_force.x;
-      force.y += block_force.y;
+      float2 block_accel = get_accel(pos_data, sdata, blockDim.x);
+      acc.x += block_accel.x;
+      acc.y += block_accel.y;
     }    
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
-    vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
+    vels_new[i].x = vels_old[i].x + acc.x * dt;
+    vels_new[i].y = vels_old[i].y + acc.y * dt;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
     data_new[i].y = data_old[i].y + vels_new[i].y * dt;

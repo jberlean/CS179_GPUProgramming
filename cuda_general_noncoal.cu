@@ -34,8 +34,8 @@ int num_threads_per_block;
 float2* particle_vels[2]; // x and y represent velocity in 2D
 float3* particle_data[2]; // x and y represent position in 2D, z represents mass
 
-#ifdef USE_FORCES_ARRAY
-  float2 *forces;
+#ifdef USE_ACCEL_ARRAY
+  float2 *accel;
 #endif
 
 __global__
@@ -65,8 +65,8 @@ void alloc_data() {
   gpuErrChk(cudaMalloc((void **) &particle_data[0], sizeof(float3) * num_particles));
   gpuErrChk(cudaMalloc((void **) &particle_data[1], sizeof(float3) * num_particles));
 
-  #ifdef USE_FORCES_ARRAY
-    gpuErrChk(cudaMalloc((void **) &forces, sizeof(float2) * num_particles));
+  #ifdef USE_ACCEL_ARRAY
+    gpuErrChk(cudaMalloc((void **) &accel, sizeof(float2) * num_particles));
   #endif
 }
 
@@ -116,32 +116,46 @@ void delete_data() {
     gpuErrChk(cudaFree(particle_data[i]));
   }
 
-  #ifdef USE_FORCES_ARRAY
-    gpuErrChk(cudaFree(forces));
+  #ifdef USE_ACCEL_ARRAY
+    gpuErrChk(cudaFree(accel));
   #endif
 }
 
 __device__
-float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
-  // sum force from every other particle based on mass, position of both particles
-  float2 force = {0, 0};
+float2 get_accel(float3 pos_data, float3 * data_old, int num_particles) {
+  // sum acceleration from every other particle based on mass, position of both particles
+  float2 accel = {0, 0};
 
-  float3 other_data1; // saves about 3s @ 128 threads/block and 1024 particles to store data_old[i], x_dist, and y_dist locally
-  float x_dist1, y_dist1;
+  float3 other_data1, other_data2, other_data3, other_data4;
+  float x_dist1, x_dist2, x_dist3, x_dist4;
+  float y_dist1, y_dist2, y_dist3, y_dist4;
 
-  float force_magnitude1;
+  float accel_mag1, accel_mag2, accel_mag3, accel_mag4;
   for (int i = 0; i < num_particles; i++)
   {
     other_data1 = data_old[i];
+	other_data2 = data_old[i + 1];
+	other_data3 = data_old[i + 2];
+	other_data4 = data_old[i + 3];
+
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
+    x_dist2 = pos_data.x - other_data2.x;
+    y_dist2 = pos_data.y - other_data2.y;
+    x_dist3 = pos_data.x - other_data3.x;
+    y_dist3 = pos_data.y - other_data3.y;
+    x_dist4 = pos_data.x - other_data4.x;
+    y_dist4 = pos_data.y - other_data4.y;
 
-    force_magnitude1 = pos_data.z * other_data1.z * pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, -1.5f);
+    accel_mag1 = other_data1.z * pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, -1.5f);
+    accel_mag2 = other_data2.z * pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, -1.5f);
+    accel_mag3 = other_data3.z * pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, -1.5f);
+    accel_mag4 = other_data4.z * pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, -1.5f);
 
-    force.x -= x_dist1 * force_magnitude1;
-    force.y -= y_dist1 * force_magnitude1;
+    accel.x -= fma(x_dist1, accel_mag1, fma(x_dist2, accel_mag2, fma(x_dist3, accel_mag3, x_dist4 * accel_mag4);
+    accel.y -= fma(y_dist1, accel_mag1, fma(y_dist2, accel_mag2, fma(y_dist3, accel_mag3, y_dist4 * accel_mag4);
   }
-  return force;  
+  return accel;  
 }
 
 void get_particle_data(float * h_particle_data, float * h_particle_vels) {
