@@ -6,6 +6,9 @@
 
 #include "n_body_sim_cuda.cuh"
 
+#include "cuda_general_coal.cu"
+
+
 __global__
 void interact_kernel(float * vels_old, float * vels_new, float * data_old, float * data_new, float dt, int num_particles) {
   // each thread handles a particle
