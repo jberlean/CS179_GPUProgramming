@@ -172,7 +172,7 @@ void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, fl
  
 void call_interact_kernel(float dt) {
   // call kernel
-  pxp_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
+  interact_kernel<<<num_blocks, num_threads_per_block, num_threads_per_block * sizeof(float3)>>>
                                                         (particle_vels[pingpong], particle_vels[1 - pingpong], 
                                                            particle_data[pingpong], particle_data[1 - pingpong], 
                                                            dt, num_particles);
