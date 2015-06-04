@@ -26,13 +26,15 @@ int pingpong = 0;
 // Number particles; determined at runtime.
 int num_particles;    
  
+// Parameters for the kernel.
 int num_blocks;
 int num_threads_per_block;
 
-// Device buffer variables
+// Device buffer variables.
 float* particle_vels[2]; 
 float* particle_data[3]; 
 
+// Used for PXPOPT algorithm.
 #ifdef USE_ACCEL_ARRAY
   float *accel;
 #endif
@@ -115,7 +117,7 @@ void init_data(int h_num_particles, float *h_particle_data, float *h_particle_ve
 
   alloc_data();
 
-  // Rearrange data from the original interleaved format, to allow coalesced memory accesses
+  // Rearrange data from the original interleaved format to allow coalesced memory accesses.
   float *temp_particle_data, *temp_particle_vels;
   temp_particle_data = new float[num_particles * 3];
   temp_particle_vels = new float[num_particles * 2];
@@ -160,7 +162,7 @@ float2 get_accel(float3 pos_data, float * data_old, int num_particles) {
   float *mass = data_old + 2 * num_particles;
 
   float accel_mag1, accel_mag2, accel_mag3, accel_mag4;
-  for (int i = 0; i < num_particles; i++)
+  for (int i = 0; i < num_particles; i += 4)
   {
     other_data1.x = pos_x[i];
     other_data1.y = pos_y[i];
