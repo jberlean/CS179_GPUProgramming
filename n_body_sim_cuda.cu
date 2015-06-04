@@ -414,7 +414,7 @@ void pxp_opt_forces_kernel(float2 * forces, float2 * vels_old, float2 * vels_new
  
     __syncthreads();
 
-    float2 block_force = get_force(data_old[i], sdata, blockDim.x);
+    float2 block_force = get_force(data_old[rid], sdata, blockDim.x);
     atomicAdd(&forces[rid].x, block_force.x);
     atomicAdd(&forces[rid].y, block_force.y);
     
