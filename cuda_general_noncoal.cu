@@ -34,6 +34,9 @@ int num_threads_per_block;
 float2* particle_vels[2]; // x and y represent velocity in 2D
 float3* particle_data[2]; // x and y represent position in 2D, z represents mass
 
+#ifdef USE_FORCES_ARRAY
+  float2 *forces;
+#endif
 
 __global__
 void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_buffer2, float * random, float box_width, 
@@ -61,6 +64,10 @@ void alloc_data() {
   
   gpuErrChk(cudaMalloc((void **) &particle_data[0], sizeof(float3) * num_particles));
   gpuErrChk(cudaMalloc((void **) &particle_data[1], sizeof(float3) * num_particles));
+
+  #ifdef USE_FORCES_ARRAY
+    gpuErrChk(cudaMalloc((void **) &forces, sizeof(float2) * num_particles));
+  #endif
 }
 
 void init_data(int h_num_particles, float box_width, float box_height, float min_vel, 
@@ -108,6 +115,10 @@ void delete_data() {
     gpuErrChk(cudaFree(particle_vels[i]));
     gpuErrChk(cudaFree(particle_data[i]));
   }
+
+  #ifdef USE_FORCES_ARRAY
+    gpuErrChk(cudaFree(forces));
+  #endif
 }
 
 __device__

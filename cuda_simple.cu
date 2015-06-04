@@ -5,9 +5,9 @@
 
 #include <cuda_runtime.h>
 
-#include "cuda_general_noncoal.cu"
 #include "n_body_sim_cuda.cuh"
 
+#include "cuda_general_noncoal.cu"
 
 __global__
 void interact_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 * data_new, float dt, int num_particles) {
@@ -36,13 +36,6 @@ void simulate_time_step(float dt) {
 
   // update pingpong
   pingpong = 1 - pingpong;
-}
-
-
-void get_particle_data(float * h_particle_data, float * h_particle_vels) {
-  // copy GPU data into particle_data, particle_vels array
-  gpuErrChk(cudaMemcpy(h_particle_data, particle_data[pingpong], sizeof(float) * 3 * num_particles, cudaMemcpyDeviceToHost));
-  gpuErrChk(cudaMemcpy(h_particle_vels, particle_vels[pingpong], sizeof(float) * 2 * num_particles, cudaMemcpyDeviceToHost));
 }
 
 std::string get_algorithm() {

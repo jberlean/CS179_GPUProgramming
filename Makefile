@@ -49,29 +49,29 @@ sim_simple: n_body_sim.cc cuda_simple.o
 cuda_simple.o: cuda_simple.cu cuda_general_noncoal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
-sim_pxp: n_body_sim.cc cuda_pxp.o
+sim_pxp: n_body_sim.cc cuda_pxp.o 
 	$(CC) $< -o $@ cuda_pxp.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
-cuda_pxp.o: cuda_pxp.cu
+cuda_pxp.o: cuda_pxp.cu cuda_general_noncoal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 sim_pxp_opt: n_body_sim.cc cuda_pxp_opt.o
 	$(CC) $< -o $@ cuda_pxp_opt.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
-cuda_pxp_opt.o: cuda_pxp_opt.cu
+cuda_pxp_opt.o: cuda_pxp_opt.cu cuda_general_noncoal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 sim_simple_coalesced: n_body_sim.cc cuda_simple_coal.o
 	$(CC) $< -o $@ cuda_simple_coal.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
-cuda_simple_coal.o: cuda_simple_coal.cu
+cuda_simple_coal.o: cuda_simple_coal.cu cuda_general_coal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 sim_pxp_coalesced: n_body_sim.cc cuda_pxp_coal.o
 	$(CC) $< -o $@ cuda_pxp_coal.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
-cuda_pxp_coal.o: cuda_pxp_coal.cu
+cuda_pxp_coal.o: cuda_pxp_coal.cu cuda_general_coal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 sim_pxp_opt_coalesced: n_body_sim.cc cuda_pxp_opt_coal.o
 	$(CC) $< -o $@ cuda_pxp_opt_coal.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
-cuda_pxp_opt_coal.o: cuda_pxp_opt_coal.cu
+cuda_pxp_opt_coal.o: cuda_pxp_opt_coal.cu cuda_general_coal.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
 
