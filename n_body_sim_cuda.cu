@@ -134,7 +134,14 @@ float2 get_accel_lu1(float3 pos_data, float3 * data_old, int num_particles) {
     x_dist1 = pos_data.x - other_data1.x;
     y_dist1 = pos_data.y - other_data1.y;
 
-    accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5f);
+    //accel_magnitude1 = other_data1.z + .35f; // 72.345ms
+    //accel_magnitude1 = other_data1.z / .35f; // 327.28ms 
+    //accel_magnitude1 = other_data1.z * .35f; // 72.339ms
+    //accel_magnitude1 = other_data1.z / (x_dist1*x_dist1+y_dist1*y_dist1+SOFT_FACTOR); // 597.02ms -> 269.74
+    //accel_magnitude1 = other_data1.z / pow(/*x_dist1 * x_dist1 + y_dist1 * y_dist1 + */SOFT_FACTOR, 1.5f); // 766.51ms -> 439.23
+    //accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5f); // 723.27ms -> 395.99 -> 126.25
+    accel_magnitude1 = other_data1.z * pow(fma(x_dist1 * x_dist1, y_dist1 * y_dist1, SOFT_FACTOR), -1.5f); // 978.06ms 
+    //accel_magnitude1 = other_data1.z * pow(rsqrt(fma(x_dist1*x_dist1, y_dist1*y_dist1, SOFT_FACTOR)), 3.0f); // 978.06ms 
     accel.x -= x_dist1 * accel_magnitude1;
     accel.y -= y_dist1 * accel_magnitude1;   
   }
@@ -161,8 +168,8 @@ float2 get_accel_lu2(float3 pos_data, float3 * data_old, int num_particles) {
     x_dist2 = pos_data.x - other_data2.x;
     y_dist2 = pos_data.y - other_data2.y;
 
-    accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5f);
-    accel_magnitude2 = other_data2.z / pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5f);
+    accel_magnitude1 = other_data1.z * pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, -1.5f);
+    accel_magnitude2 = other_data2.z * pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, -1.5f);
 
     accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2;
     accel.y -= y_dist1 * accel_magnitude1 + y_dist2 * accel_magnitude2;
@@ -197,10 +204,10 @@ float2 get_accel_lu4(float3 pos_data, float3 * data_old, int num_particles) {
     x_dist4 = pos_data.x - other_data4.x;
     y_dist4 = pos_data.y - other_data4.y;
 
-    accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5f);
-    accel_magnitude2 = other_data2.z / pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5f);
-    accel_magnitude3 = other_data3.z / pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, 1.5f);
-    accel_magnitude4 = other_data4.z / pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, 1.5f);
+    accel_magnitude1 = other_data1.z * pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, -1.5f);
+    accel_magnitude2 = other_data2.z * pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, -1.5f);
+    accel_magnitude3 = other_data3.z * pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, -1.5f);
+    accel_magnitude4 = other_data4.z * pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, -1.5f);
 
     accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2 + 
                x_dist3 * accel_magnitude3 + x_dist4 * accel_magnitude4;
@@ -255,14 +262,14 @@ float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
     x_dist8 = pos_data.x - other_data8.x;
     y_dist8 = pos_data.y - other_data8.y;
 
-    accel_magnitude1 = other_data1.z / pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, 1.5f);
-    accel_magnitude2 = other_data2.z / pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, 1.5f);
-    accel_magnitude3 = other_data3.z / pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, 1.5f);
-    accel_magnitude4 = other_data4.z / pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, 1.5f);
-    accel_magnitude5 = other_data5.z / pow(x_dist5 * x_dist5 + y_dist5 * y_dist5 + SOFT_FACTOR, 1.5f);
-    accel_magnitude6 = other_data6.z / pow(x_dist6 * x_dist6 + y_dist6 * y_dist6 + SOFT_FACTOR, 1.5f);
-    accel_magnitude7 = other_data7.z / pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + SOFT_FACTOR, 1.5f);
-    accel_magnitude8 = other_data8.z / pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + SOFT_FACTOR, 1.5f);
+    accel_magnitude1 = other_data1.z * pow(x_dist1 * x_dist1 + y_dist1 * y_dist1 + SOFT_FACTOR, -1.5f);
+    accel_magnitude2 = other_data2.z * pow(x_dist2 * x_dist2 + y_dist2 * y_dist2 + SOFT_FACTOR, -1.5f);
+    accel_magnitude3 = other_data3.z * pow(x_dist3 * x_dist3 + y_dist3 * y_dist3 + SOFT_FACTOR, -1.5f);
+    accel_magnitude4 = other_data4.z * pow(x_dist4 * x_dist4 + y_dist4 * y_dist4 + SOFT_FACTOR, -1.5f);
+    accel_magnitude5 = other_data5.z * pow(x_dist5 * x_dist5 + y_dist5 * y_dist5 + SOFT_FACTOR, -1.5f);
+    accel_magnitude6 = other_data6.z * pow(x_dist6 * x_dist6 + y_dist6 * y_dist6 + SOFT_FACTOR, -1.5f);
+    accel_magnitude7 = other_data7.z * pow(x_dist7 * x_dist7 + y_dist7 * y_dist7 + SOFT_FACTOR, -1.5f);
+    accel_magnitude8 = other_data8.z * pow(x_dist8 * x_dist8 + y_dist8 * y_dist8 + SOFT_FACTOR, -1.5f);
 
     accel.x -= x_dist1 * accel_magnitude1 + x_dist2 * accel_magnitude2 + 
                x_dist3 * accel_magnitude3 + x_dist4 * accel_magnitude4 +
@@ -280,7 +287,7 @@ float2 get_accel_lu8(float3 pos_data, float3 * data_old, int num_particles) {
 
 __device__
 float2 get_accel(float3 pos_data, float3 * data_old, int num_particles) {
-/*
+
   // sum accel from every other particle based on mass, position of both particles
 #if UNROLLING == 1
   return get_accel_lu1(pos_data, data_old, num_particles);
@@ -293,9 +300,6 @@ float2 get_accel(float3 pos_data, float3 * data_old, int num_particles) {
 #else
   printf("Incorrect unrolling factor given %d", UNROLLING);
 #endif
-*/
-  float2 f = {0,0};
-  return f;
 }
 
 
