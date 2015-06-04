@@ -107,15 +107,12 @@ void delete_data() {
 __device__
 float2 get_force(float3 pos_data, float3 * data_old, int num_particles) {
   // sum force from every other particle based on mass, position of both particles
-  float2 force;
-  force.x = 0;
-  force.y = 0;
+  float2 force = {0, 0};
 
   float3 other_data1; // saves about 3s @ 128 threads/block and 1024 particles to store data_old[i], x_dist, and y_dist locally
   float x_dist1, y_dist1;
 
   float force_magnitude1;
-  //float soft_factor = SOFT_FACTOR;
   for (int i = 0; i < num_particles; i++)
   {
     other_data1 = data_old[i];

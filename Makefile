@@ -57,6 +57,12 @@ sim_simple: n_body_sim.cc cuda_simple.o
 cuda_simple.o: cuda_simple.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
 
+sim_pxp: n_body_sim.cc cuda_pxp.o
+	$(CC) $< -o $@ cuda_pxp.o -O3 $(LDFLAGS) -Wall -I$(CUDA_INC_PATH) -fopenmp
+
+cuda_pxp.o: cuda_pxp.cu
+	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<
+
 
 clean:
 	rm -f *.o $(TARGETS)

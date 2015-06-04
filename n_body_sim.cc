@@ -87,7 +87,7 @@ void run_simulation(
     call_interact_kernel(dt);
 
     status_counter += num_particles*num_particles;
-    if (status_counter > 1000000000) {
+    if (status_counter > 500000000) {
       std::cout << "Run " << step << " time steps\n";
       status_counter = 0;
     }
