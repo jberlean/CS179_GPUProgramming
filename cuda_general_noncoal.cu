@@ -131,7 +131,8 @@ float2 get_accel(float3 pos_data, float3 * data_old, int num_particles) {
   float y_dist1, y_dist2, y_dist3, y_dist4;
 
   float accel_mag1, accel_mag2, accel_mag3, accel_mag4;
-  for (int i = 0; i < num_particles; i++)
+  // Four-fold loop unrolling. 
+  for (int i = 0; i < num_particles; i += 4)
   {
     other_data1 = data_old[i];
 	other_data2 = data_old[i + 1];
