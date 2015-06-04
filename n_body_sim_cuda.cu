@@ -48,16 +48,6 @@ void cudaInitKernel(float2 * vels_buffer, float3 * data_buffer1, float3 * data_b
 
     data_buffer2[i].z = 1;    
 
-/*    if (i == 0) {
-      data_buffer1[i].z = 1000;
-      data_buffer2[i].z = 1000;
-      data_buffer1[i].x = box_width / 2;
-      data_buffer1[i].y = box_height / 2;
-      vels_buffer[i].x = 0;
-      vels_buffer[i].y = 0;
-    }
-*/
-
     i += blockDim.x * gridDim.x;
   }
 }
@@ -383,7 +373,7 @@ void pxp_kernel(float2 * vels_old, float2 * vels_new, float3 * data_old, float3 
       force.y += block_force.y;
     }    
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z;
     vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 
@@ -434,7 +424,7 @@ void pxp_opt_particles_kernel(float2 * forces, float2 * vels_old, float2 * vels_
   {
     float2 force = forces[i];
     
-    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; // TODO: replace data_old[i] with pos_data
+    vels_new[i].x = vels_old[i].x + force.x * dt / data_old[i].z; 
     vels_new[i].y = vels_old[i].y + force.y * dt / data_old[i].z;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 

@@ -49,7 +49,7 @@ void apply_accel_kernel(float2 *accel, float2 *vels_old, float2 *vels_new, float
   {
     float2 acc = accel[i];
     
-    vels_new[i].x = vels_old[i].x + acc.x * dt; // TODO: replace data_old[i] with pos_data
+    vels_new[i].x = vels_old[i].x + acc.x * dt;
     vels_new[i].y = vels_old[i].y + acc.y * dt;
     
     data_new[i].x = data_old[i].x + vels_new[i].x * dt; 

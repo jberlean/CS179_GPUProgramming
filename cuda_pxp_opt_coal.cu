@@ -61,7 +61,7 @@ void apply_accel_kernel(float * accel, float * vels_old, float * vels_new, float
     acc.x = accel[i];
     acc.y = accel[i + num_particles];
 
-    vels_new[i] = vels_old[i] + acc.x * dt; // TODO: replace data_old[i] with pos_data
+    vels_new[i] = vels_old[i] + acc.x * dt;
     vels_new[i + num_particles] = vels_old[i + num_particles] + acc.y * dt;
     
     data_new[i] = data_old[i] + vels_new[i] * dt; 
